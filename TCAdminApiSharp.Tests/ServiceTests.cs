@@ -93,21 +93,21 @@ namespace TCAdminApiSharp.Tests
             Assert.Fail("No exception");
         }
         
-        [Test]
-        public void ServiceCreateJsonTest()
-        {
-            var serviceBuilder = new ServiceBuilder()
-                .WithAutomaticPort(true)
-                .WithGameId(12)
-                .WithBranded(true)
-                .WithDatacenterId(1)
-                .WithVariables(new Dictionary<string, object>()
-                {
-                    {"test", 123}
-                })
-                .WithSlots(100)
-                .WithBillingId("100Not4Me");
-            _tcaClient.ServicesController.CreateService(serviceBuilder);
-        }
+        // [Test]
+        // public void ServiceCreateJsonTest()
+        // {
+        //     var serviceBuilder = new ServiceBuilder()
+        //         .WithAutomaticPort(true)
+        //         .WithGameId(12)
+        //         .WithBranded(true)
+        //         .WithDatacenterId(1)
+        //         .WithVariables(new Dictionary<string, object>()
+        //         {
+        //             {"test", 123}
+        //         })
+        //         .WithSlots(100)
+        //         .WithBillingId("100Not4Me");
+        //     _tcaClient.ServicesController.CreateService(serviceBuilder);
+        // }
     }
 }
