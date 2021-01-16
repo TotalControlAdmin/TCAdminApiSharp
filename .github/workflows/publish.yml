@@ -1,9 +1,7 @@
-name: .NET
+name: Deploy to Nuget
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
     branches: [ master ]
 
 jobs:
@@ -23,3 +21,8 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Deploy
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csproj
+        NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
