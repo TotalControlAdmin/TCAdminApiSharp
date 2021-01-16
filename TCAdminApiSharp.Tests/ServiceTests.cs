@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using Serilog.Events;
+using TCAdminApiSharp.Entities.Service;
+using TCAdminApiSharp.Exceptions;
 using TCAdminApiSharp.Exceptions.API;
-using TCAdminApiSharp.Exceptions.Services;
 
 namespace TCAdminApiSharp.Tests
 {
@@ -13,7 +16,7 @@ namespace TCAdminApiSharp.Tests
         [SetUp]
         public void Setup()
         {
-            _tcaClient = new TcaClient("https://4a815e4e-aaa8-4351-a948-5ca3f92e5c8b.mock.pstmn.io", "-");
+            _tcaClient = new TcaClient("https://4a815e4e-aaa8-4351-a948-5ca3f92e5c8b.mock.pstmn.io", "-", LogEventLevel.Debug);
         }
 
         [Test]
@@ -26,26 +29,12 @@ namespace TCAdminApiSharp.Tests
         [Test]
         public void GetNonExistentServiceTest()
         {
-            Assert.Catch<ServiceNotFoundException>(() =>
+            Assert.Catch<NotFoundException>(() =>
             {
                 var _ = _tcaClient.ServicesController.GetService(0);
             });
         }
-        
-        [Test]
-        public void ServiceCustomVariablesParseCheck()
-        {
-            var service = _tcaClient.ServicesController.GetService(1);
-            Assert.AreEqual("minecraft_server2.jar", service.Variables.Values["Jar"]);
-        }
-        
-        [Test]
-        public void ServiceAppDataParseCheck()
-        {
-            var service = _tcaClient.ServicesController.GetService(1);
-            Assert.AreEqual(false, (bool)service.AppData.Values["__TCA:PROCESSING"]);
-        }
-        
+
         [Test]
         public void GetServicesListTest()
         {
@@ -102,6 +91,23 @@ namespace TCAdminApiSharp.Tests
             }
         
             Assert.Fail("No exception");
+        }
+        
+        [Test]
+        public void ServiceCreateJsonTest()
+        {
+            var serviceBuilder = new ServiceBuilder()
+                .WithAutomaticPort(true)
+                .WithGameId(12)
+                .WithBranded(true)
+                .WithDatacenterId(1)
+                .WithVariables(new Dictionary<string, object>()
+                {
+                    {"test", 123}
+                })
+                .WithSlots(100)
+                .WithBillingId("100Not4Me");
+            _tcaClient.ServicesController.CreateService(serviceBuilder);
         }
     }
 }

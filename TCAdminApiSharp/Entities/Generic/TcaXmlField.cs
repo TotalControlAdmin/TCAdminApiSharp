@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace TCAdminApiSharp.Entities.Generic
 {
-    public class TcaXmlField
+    public class TcaXmlField : Dictionary<string, object>
     {
-        [JsonProperty("Values")] public Dictionary<string, object> Values { get; set; }
+        public TcaXmlField()
+        {
+        }
 
-        [JsonProperty("Keys")] public IList<string> Keys { get; set; }
+        public TcaXmlField(IDictionary<string, object> dictionary) : base(dictionary)
+        {
+        }
     }
 }

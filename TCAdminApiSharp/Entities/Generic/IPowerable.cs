@@ -7,7 +7,5 @@ namespace TCAdminApiSharp.Entities.Generic
         public void Start(string reason = "");
         public void Restart(string reason = "");
         public void Stop(string reason = "");
-
-        public async Task StartAsync(string reason = "") => await Task.Run(() => Start(reason));
     }
 }

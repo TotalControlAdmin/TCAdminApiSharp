@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Net;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using TCAdminApiSharp.Entities;
+using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Service;
+using TCAdminApiSharp.Exceptions;
 using TCAdminApiSharp.Exceptions.API;
-using TCAdminApiSharp.Exceptions.Services;
 
 namespace TCAdminApiSharp.Controllers
 {
@@ -14,6 +12,16 @@ namespace TCAdminApiSharp.Controllers
     {
         public ServicesController() : base("api/service")
         {
+        }
+
+        public int CreateService(ServiceBuilder builder)
+        {
+            var body = builder.GenerateRequestBody();
+            var request = GenerateDefaultRequest();
+            request.Resource += "create";
+            request.Method = Method.POST;
+            request.AddParameter("createinfo", body, ParameterType.GetOrPost);
+            return ExecuteBaseResponseRequest<int>(request).Result;
         }
         
         public Service GetService(int serviceId)
@@ -28,7 +36,7 @@ namespace TCAdminApiSharp.Controllers
             {
                 if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    throw new ServiceNotFoundException(serviceId, e);
+                    throw new NotFoundException(typeof(Service), e, new []{serviceId});
                 }
 
                 throw;

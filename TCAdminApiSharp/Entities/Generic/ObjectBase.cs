@@ -18,23 +18,8 @@ namespace TCAdminApiSharp.Entities.Generic
 
     public interface IObjectBaseCrud<out T>
     {
-        public void Create(Action<T> action);
-        
         public void Update(Action<T> action);
 
         public void Delete();
-
-        public bool TryCreate(Action<T> action)
-        {
-            try
-            {
-                Create(action);
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-        }
     }
 }

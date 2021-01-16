@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RestSharp;
-using TCAdminApiSharp.Entities;
+using Serilog;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Exceptions.API;
 
@@ -16,9 +16,11 @@ namespace TCAdminApiSharp.Controllers
         public readonly TcaClient TcaClient =
             TcaClient.ServiceProvider.GetService<TcaClient>() ?? throw new InvalidOperationException();
         public readonly string BaseResource;
+        public readonly ILogger Logger;
 
         protected BaseController(string baseResource)
         {
+            Logger = Log.ForContext(GetType());
             BaseResource = baseResource;
 
             if (!baseResource.EndsWith("/"))
@@ -67,7 +69,11 @@ namespace TCAdminApiSharp.Controllers
 
         internal async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)
         {
+            Logger.Debug("Request URL: " + TcaClient.RestClient.BuildUri(request));
             var restResponse = await TcaClient.RestClient.ExecuteAsync(request);
+            Logger.Debug(restResponse.Content);
+            Logger.Debug("Response Status: " + restResponse.ResponseStatus);
+            Logger.Debug("Status Code: " + restResponse.StatusCode);
             if (restResponse.ResponseStatus != ResponseStatus.Completed)
             {
                 throw new ApiResponseException(restResponse, "Response Status is: " + restResponse.ResponseStatus);
@@ -78,8 +84,6 @@ namespace TCAdminApiSharp.Controllers
                 throw new ApiResponseException(restResponse, "Status code is: " + restResponse.StatusCode);
             }
 
-            // Console.WriteLine(_tcaClient.RestClient.BuildUri(request).ToString());
-            // Console.WriteLine(restResponse.Content);
             var baseResponse = JsonConvert.DeserializeObject<BaseResponse<object>>(restResponse.Content);
             baseResponse.RestResponse = restResponse;
             if (!baseResponse.Success)

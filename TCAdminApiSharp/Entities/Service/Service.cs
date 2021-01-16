@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RestSharp;
@@ -57,7 +56,7 @@ namespace TCAdminApiSharp.Entities.Service
 
         [JsonProperty("UserId")] public int UserId { get; set; }
 
-        [JsonProperty("Executable")] public string Executable { get; set; }
+        [JsonProperty("Executable")] public string? Executable { get; set; }
 
         [JsonProperty("UnparsedCommandLine")] public string UnparsedCommandLine { get; set; }
 
@@ -221,7 +220,7 @@ namespace TCAdminApiSharp.Entities.Service
 
         [JsonProperty("CustomPort50")] public int CustomPort50 { get; set; }
 
-        [JsonProperty("Startup")] public int Startup { get; set; }
+        [JsonProperty("Startup")] public ServiceStartup Startup { get; set; }
 
         [JsonProperty("Priority")] public int Priority { get; set; }
 
@@ -240,11 +239,6 @@ namespace TCAdminApiSharp.Entities.Service
         [JsonProperty("OverrideCommandLine")] public bool OverrideCommandLine { get; set; }
 
         [JsonProperty("Notes")] public string Notes { get; set; }
-
-        public void Create(Action<Service> action)
-        {
-            throw new NotImplementedException();
-        }
 
         public void Update(Action<Service> action)
         {
@@ -299,6 +293,12 @@ namespace TCAdminApiSharp.Entities.Service
             ServicesController.ExecuteBaseResponseRequest(request);
         }
         
-        public async Task StartAsync(string reason = "") => await Task.Run(() => Start(reason));
+        public void Configure()
+        {
+            var request = ServicesController.GenerateDefaultRequest();
+            request.Resource += $"configure/{this.ServiceId}";
+            request.Method = Method.POST;
+            ServicesController.ExecuteBaseResponseRequest(request);
+        }
     }
 }
