@@ -26,3 +26,4 @@ jobs:
       with:
         PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csproj
         NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
+        VERSION_REGEX: /^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$/m
