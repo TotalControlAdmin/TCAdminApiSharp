@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
+      VERSION_REGEX: ^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
@@ -23,19 +26,15 @@ jobs:
       uses: alexr03/publish-nuget@master
       if: github.ref == 'refs/heads/master'
       with:
-        PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csproj
-        NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
-        VERSION_REGEX: ^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$
+        PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csprojs
     - name: Get DateTime
       if: github.ref != 'refs/heads/master'
-      id: datatime
+      id: datetime
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
     - name: Deploy - Dev
       uses: alexr03/publish-nuget@master
       if: github.ref != 'refs/heads/master'
       with:
         PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csproj
-        NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
-        VERSION_REGEX: ^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$
         VERSION_SUFFIX: -dev-${{steps.datetime.outputs.date}}-${{github.run_number}}
         TAG_COMMIT: false
