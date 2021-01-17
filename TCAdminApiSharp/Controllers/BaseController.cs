@@ -31,7 +31,6 @@ namespace TCAdminApiSharp.Controllers
 
         public RestRequest GenerateDefaultRequest()
         {
-            //Testchange2
             return new(BaseResource);
         }
         
@@ -70,7 +69,8 @@ namespace TCAdminApiSharp.Controllers
 
         internal async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)
         {
-            Logger.Debug("Request URL: " + TcaClient.RestClient.BuildUri(request));
+            Logger.Verbose(JsonConvert.SerializeObject(request));
+            Logger.Debug($"Request URL [{request.Method}]: {TcaClient.RestClient.BuildUri(request)}");
             var restResponse = await TcaClient.RestClient.ExecuteAsync(request);
             Logger.Debug(restResponse.Content);
             Logger.Debug("Response Status: " + restResponse.ResponseStatus);

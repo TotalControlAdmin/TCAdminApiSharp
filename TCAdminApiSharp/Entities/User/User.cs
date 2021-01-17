@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using TCAdminApiSharp.Controllers;
 using TCAdminApiSharp.Entities.Generic;
 using Microsoft.Extensions.DependencyInjection;
+using RestSharp;
 
 namespace TCAdminApiSharp.Entities.User
 {
@@ -84,6 +85,15 @@ namespace TCAdminApiSharp.Entities.User
         [JsonProperty("TimeZoneId")] public string TimeZoneId { get; set; }
 
         [JsonProperty("UserType")] public UserType UserType { get; set; }
+
+        public void SetPassword(string password)
+        {
+            var request = UsersController.GenerateDefaultRequest();
+            request.Resource += $"setpassword/{UserId}";
+            request.Method = Method.POST;
+            request.AddParameter("password", password, ParameterType.GetOrPost);
+            UsersController.ExecuteBaseResponseRequest(request);
+        }
 
         public void Update(Action<User> action)
         {

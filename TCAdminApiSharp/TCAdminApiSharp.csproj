@@ -12,8 +12,8 @@
         <PackageIconUrl>https://avatars3.githubusercontent.com/u/67070230?s=200&amp;v=4</PackageIconUrl>
         <RepositoryUrl>https://github.com/TotalControlAdmin/TCAdminApiSharp</RepositoryUrl>
         <PackageTags>TCAdmin, Wrapper, Rest, Api</PackageTags>
-        <AssemblyVersion>1.0.0</AssemblyVersion>
-        <FileVersion>1.0.0</FileVersion>
+        <AssemblyVersion>1.0.1</AssemblyVersion>
+        <FileVersion>1.0.1</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
