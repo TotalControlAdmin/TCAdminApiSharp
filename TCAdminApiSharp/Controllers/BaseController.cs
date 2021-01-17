@@ -31,7 +31,7 @@ namespace TCAdminApiSharp.Controllers
 
         public RestRequest GenerateDefaultRequest()
         {
-            //Testchange
+            //Testchange2
             return new(BaseResource);
         }
         

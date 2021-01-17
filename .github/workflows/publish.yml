@@ -2,7 +2,7 @@ name: Deploy to Nuget
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, dev ]
 
 jobs:
   build:
@@ -23,12 +23,12 @@ jobs:
       uses: alexr03/publish-nuget@master
       if: github.ref == 'refs/heads/master'
       with:
-        PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csproj
+        PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csprojs
         NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
         VERSION_REGEX: ^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$
     - name: Get DateTime
       if: github.ref != 'refs/heads/master'
-      id: datatime
+      id: datetime
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
     - name: Deploy - Dev
       uses: alexr03/publish-nuget@master
