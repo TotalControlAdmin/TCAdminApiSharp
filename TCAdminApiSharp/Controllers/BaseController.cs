@@ -69,7 +69,10 @@ namespace TCAdminApiSharp.Controllers
 
         internal async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)
         {
-            Logger.Verbose(JsonConvert.SerializeObject(request));
+            Logger.Verbose(JsonConvert.SerializeObject(request, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
             Logger.Debug($"Request URL [{request.Method}]: {TcaClient.RestClient.BuildUri(request)}");
             var restResponse = await TcaClient.RestClient.ExecuteAsync(request);
             Logger.Debug(restResponse.Content);
