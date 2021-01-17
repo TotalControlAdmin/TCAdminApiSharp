@@ -254,6 +254,7 @@ namespace TCAdminApiSharp.Entities.Service
 
         public void Delete()
         {
+            // todo: Luis hurry up implement pls
             throw new NotImplementedException();
         }
 
