@@ -1,8 +1,13 @@
-﻿using System.Net;
+﻿using System;
+using System.Linq.Expressions;
+using System.Net;
+using Newtonsoft.Json;
+using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.User;
 using TCAdminApiSharp.Exceptions;
 using TCAdminApiSharp.Exceptions.API;
+using TCAdminApiSharp.Querying;
 
 namespace TCAdminApiSharp.Controllers
 {
@@ -46,6 +51,16 @@ namespace TCAdminApiSharp.Controllers
                 }
                 throw;
             }
+        }
+
+        public ListResponse<User> FindUsers(QueryableInfo query)
+        {
+            var request = GenerateDefaultRequest();
+            Logger.Debug(query.BuildQuery());
+            request.Method = Method.POST;
+            request.Resource += $"users/{TcaClient.GetTokenUserId()}";
+            request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
+            return ExecuteListResponseRequest<User>(request);
         }
         
         public ListResponse<User> GetMyUsers()
