@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TCAdminApiSharp.Converters;
 
 namespace TCAdminApiSharp.Querying
@@ -9,9 +11,7 @@ namespace TCAdminApiSharp.Querying
 
         [JsonProperty("Offset")] public int Offset { get; set; }
 
-        [JsonProperty("Where")]
-        [JsonConverter(typeof(ToStringJsonConverter))]
-        public WhereList WhereList { get; set; }
+        [JsonIgnore] public List<IQueryOperation> QueryOperations { get; set; } = new();
 
         public QueryableInfo()
         {
@@ -21,17 +21,22 @@ namespace TCAdminApiSharp.Querying
         {
             RowCount = rowCount;
             Offset = offset;
-            WhereList = whereList;
+            QueryOperations.Add(whereList);
         }
 
         public QueryableInfo(WhereList whereList)
         {
-            WhereList = whereList;
+            QueryOperations.Add(whereList);
         }
 
         public string BuildQuery()
         {
-            return JsonConvert.SerializeObject(this, new JsonSerializerSettings()
+            var jObject = JObject.FromObject(this);
+            foreach (var queryOperation in QueryOperations)
+            {
+                jObject.Add(queryOperation.JsonKey, queryOperation.GenerateQuery());
+            }
+            return JsonConvert.SerializeObject(jObject, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             });

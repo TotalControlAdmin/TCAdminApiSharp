@@ -5,12 +5,13 @@ using TCAdminApiSharp.Querying.Structs;
 
 namespace TCAdminApiSharp.Querying
 {
-    public class WhereList : List<WhereInfo>
+    public class WhereList : List<WhereInfo>, IQueryOperation
     {
+        public string JsonKey { get; set; } = "Where";
         public WhereOperator WhereOperator { get; set; }
 
         public WhereList() => this.WhereOperator = WhereOperator.And;
-
+        
         public WhereList(WhereInfo where)
         {
             this.WhereOperator = WhereOperator.And;
@@ -44,12 +45,11 @@ namespace TCAdminApiSharp.Querying
             ColumnValue = value
         });
 
-        public override string ToString()
+        public string GenerateQuery()
         {
             return this.Aggregate("",
                 (current, whereInfo) =>
                     current +
-                    $"([{whereInfo.Column}] {whereInfo.ColumnOperator.ToString()} '{whereInfo.ColumnValue}')");
-        }
+                    $"([{whereInfo.Column}] {whereInfo.ColumnOperator.ToString()} '{whereInfo.ColumnValue}')");        }
     }
 }
