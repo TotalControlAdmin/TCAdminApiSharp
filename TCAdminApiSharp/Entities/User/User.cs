@@ -5,6 +5,7 @@ using TCAdminApiSharp.Controllers;
 using TCAdminApiSharp.Entities.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using RestSharp;
+using TCAdminApiSharp.Helpers;
 
 namespace TCAdminApiSharp.Entities.User
 {
@@ -101,12 +102,39 @@ namespace TCAdminApiSharp.Entities.User
 
         public void Update(Action<User> action)
         {
-            throw new NotImplementedException();
+            var service = new User();
+            action(service);
+            var putJson = JsonConvert.SerializeObject(service, Constants.IgnoreDefaultValues);
+            var request = UsersController.GenerateDefaultRequest();
+            request.Resource += this.UserId;
+            request.Method = Method.PUT;
+            request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
+            UsersController.ExecuteBaseResponseRequest(request);
         }
 
         public void Delete()
         {
             throw new NotImplementedException();
+        }
+        
+        public bool Suspend(bool recursive = true, bool suspendServices = true)
+        {
+            var request = UsersController.GenerateDefaultRequest();
+            request.Resource += $"suspend/{this.UserId}";
+            request.Method = Method.POST;
+            request.AddParameter(nameof(recursive), recursive, ParameterType.GetOrPost);
+            request.AddParameter(nameof(suspendServices), suspendServices, ParameterType.GetOrPost);
+            return UsersController.ExecuteBaseResponseRequest(request).Success;
+        }
+        
+        public bool Unsuspend(bool recursive = true, bool enableServices = true)
+        {
+            var request = UsersController.GenerateDefaultRequest();
+            request.Resource += $"unsuspend/{this.UserId}";
+            request.Method = Method.POST;
+            request.AddParameter(nameof(recursive), recursive, ParameterType.GetOrPost);
+            request.AddParameter(nameof(enableServices), enableServices, ParameterType.GetOrPost);
+            return UsersController.ExecuteBaseResponseRequest(request).Success;
         }
     }
 }

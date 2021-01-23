@@ -16,7 +16,7 @@ namespace TCAdminApiSharp.Tests
         [SetUp]
         public void Setup()
         {
-            _tcaClient = new TcaClient("https://4a815e4e-aaa8-4351-a948-5ca3f92e5c8b.mock.pstmn.io", "-", LogEventLevel.Debug);
+            _tcaClient = new TcaClient("https://4a815e4e-aaa8-4351-a948-5ca3f92e5c8b.mock.pstmn.io", "-", TcaClientSettings.Debug);
         }
 
         [Test]

@@ -8,6 +8,7 @@ using RestSharp;
 using Serilog;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Exceptions.API;
+using TCAdminApiSharp.Helpers;
 
 namespace TCAdminApiSharp.Controllers
 {
@@ -34,61 +35,66 @@ namespace TCAdminApiSharp.Controllers
             return new(BaseResource);
         }
         
-        internal BaseResponse ExecuteBaseResponseRequest(RestRequest request)
+        public BaseResponse ExecuteBaseResponseRequest(RestRequest request)
         {
             var response = ExecuteRequest<BaseResponse>(request, out var restResponse);
             response.RestResponse = restResponse;
             return response;
         }
 
-        internal BaseResponse<T> ExecuteBaseResponseRequest<T>(RestRequest request)
+        public BaseResponse<T> ExecuteBaseResponseRequest<T>(RestRequest request)
         {
             var response = ExecuteRequest<BaseResponse<T>>(request, out var restResponse);
             response.RestResponse = restResponse;
             return response;
         }
         
-        internal ListResponse<T> ExecuteListResponseRequest<T>(RestRequest request)
+        public ListResponse<T> ExecuteListResponseRequest<T>(RestRequest request)
         {
             var response = ExecuteRequest<ListResponse<T>>(request, out var restResponse);
             response.RestResponse = restResponse;
             return response;
         }
         
-        internal T ExecuteRequest<T>(RestRequest request)
+        public T ExecuteRequest<T>(RestRequest request)
         {
             return ExecuteRequest<T>(request, out _);
         }
 
-        internal T ExecuteRequest<T>(RestRequest request, out IRestResponse restResponse)
+        public T ExecuteRequest<T>(RestRequest request, out IRestResponse restResponse)
         {
             var (t, restResponse2) = ExecuteRequestAsync<T>(request).ConfigureAwait(false).GetAwaiter().GetResult();
             restResponse = restResponse2;
             return t;
         }
 
-        internal async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)
+        public async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)
         {
-            Logger.Verbose(JsonConvert.SerializeObject(request, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            Logger.Verbose(JsonConvert.SerializeObject(request, Constants.IgnoreReferenceLoop));
             Logger.Debug($"Request URL [{request.Method}]: {TcaClient.RestClient.BuildUri(request)}");
             var restResponse = await TcaClient.RestClient.ExecuteAsync(request);
-            Logger.Debug(restResponse.Content);
+            Logger.Verbose(JsonConvert.SerializeObject(restResponse, Constants.IgnoreReferenceLoop));
             Logger.Debug("Response Status: " + restResponse.ResponseStatus);
             Logger.Debug("Status Code: " + restResponse.StatusCode);
             if (restResponse.ResponseStatus != ResponseStatus.Completed)
             {
+                if (!TcaClient.Settings.ThrowOnApiResponseStatusNonComplete)
+                {
+                    return new Tuple<T, IRestResponse>(default!, restResponse);
+                }
                 throw new ApiResponseException(restResponse, "Response Status is: " + restResponse.ResponseStatus);
             }
 
             if (restResponse.StatusCode != HttpStatusCode.OK)
             {
+                if (!TcaClient.Settings.ThrowOnApiStatusCodeNonOk)
+                {
+                    return new Tuple<T, IRestResponse>(default!, restResponse);
+                }
                 throw new ApiResponseException(restResponse, "Status code is: " + restResponse.StatusCode);
             }
 
-            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<object>>(restResponse.Content);
+            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<object>>(restResponse.Content); // First deserialize to the base response
             baseResponse.RestResponse = restResponse;
             if (!baseResponse.Success)
             {
@@ -98,6 +104,10 @@ namespace TCAdminApiSharp.Controllers
                     return new Tuple<T, IRestResponse>(JsonConvert.DeserializeObject<T>(restResponse.Content), restResponse);
                 }
 
+                if (!TcaClient.Settings.ThrowOnApiSuccessFailure)
+                {
+                    return new Tuple<T, IRestResponse>(default!, restResponse);
+                }
                 throw new ApiResponseException(restResponse, "API returned an error");
             }
 

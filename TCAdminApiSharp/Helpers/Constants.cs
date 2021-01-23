@@ -11,5 +11,10 @@ namespace TCAdminApiSharp.Helpers
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Ignore
         };
+        
+        public static readonly JsonSerializerSettings IgnoreReferenceLoop = new()
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        };
     }
 }

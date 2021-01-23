@@ -12,16 +12,18 @@ namespace TCAdminApiSharp
     {
         public readonly string Host;
         private readonly string _apiKey;
-        internal static ServiceProvider ServiceProvider;
+        internal static ServiceProvider ServiceProvider = new ServiceCollection().BuildServiceProvider();
         internal readonly RestClient RestClient;
         public readonly ServicesController ServicesController;
         public readonly ServersController ServersController;
         public readonly UsersController UsersController;
         public readonly TasksController TasksController;
+        public readonly TcaClientSettings Settings;
 
-        public TcaClient(string host, string apiKey, LogEventLevel minimumLogLevel = LogEventLevel.Information)
+        public TcaClient(string host, string apiKey, TcaClientSettings? clientSettings = null)
         {
-            SetupDefaultLogger(minimumLogLevel);
+            clientSettings ??= TcaClientSettings.Default;
+            SetupDefaultLogger(clientSettings.MinimumLogLevel);
             CreateHostBuilder();
             if (string.IsNullOrEmpty(host))
             {
@@ -31,7 +33,8 @@ namespace TCAdminApiSharp
             {
                 throw new ArgumentException("Parameter is null/empty", nameof(apiKey));
             }
-
+            
+            Settings = clientSettings;
             Host = host;
             _apiKey = apiKey;
 
