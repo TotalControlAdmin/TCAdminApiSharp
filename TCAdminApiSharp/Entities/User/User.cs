@@ -87,7 +87,7 @@ namespace TCAdminApiSharp.Entities.User
 
         [JsonProperty("UserType")] public UserType UserType { get; set; }
 
-        public IList<Service.Service> Services =>
+        [JsonIgnore] public IList<Service.Service> Services =>
             UsersController.TcaClient.ServicesController.GetServicesByUserId(this.UserId).Result;
 
         public void SetPassword(string password)
