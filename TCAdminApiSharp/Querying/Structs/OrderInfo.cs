@@ -4,12 +4,13 @@ using TCAdminApiSharp.Querying.Operators;
 
 namespace TCAdminApiSharp.Querying.Structs
 {
-    public struct WhereInfo
+    public struct OrderInfo
     {
+        [JsonProperty("Field")]
         public string Column;
-        public object ColumnValue;
         
+        [JsonProperty("Direction")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public ColumnOperator ColumnOperator;
+        public OrderOperator Operator;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace TCAdminApiSharp.Querying
+﻿namespace TCAdminApiSharp.Querying.Operators
 {
     public enum WhereOperator
     {

@@ -1,9 +1,11 @@
-﻿namespace TCAdminApiSharp.Querying
+﻿using Newtonsoft.Json.Linq;
+
+namespace TCAdminApiSharp.Querying
 {
     public interface IQueryOperation
     {
         string JsonKey { get; set; }
 
-        string GenerateQuery();
+        JToken GenerateQuery();
     }
 }
