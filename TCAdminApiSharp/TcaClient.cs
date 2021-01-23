@@ -15,6 +15,7 @@ namespace TCAdminApiSharp
         internal static ServiceProvider ServiceProvider;
         internal readonly RestClient RestClient;
         public readonly ServicesController ServicesController;
+        public readonly ServersController ServersController;
         public readonly UsersController UsersController;
         public readonly TasksController TasksController;
 
@@ -38,6 +39,7 @@ namespace TCAdminApiSharp
             RestClient.AddDefaultHeader("api_key", apiKey);
             
             ServicesController = ServiceProvider.GetService<ServicesController>() ?? throw new InvalidOperationException();
+            ServersController = ServiceProvider.GetService<ServersController>() ?? throw new InvalidOperationException();
             UsersController = ServiceProvider.GetService<UsersController>() ?? throw new InvalidOperationException();
             TasksController = ServiceProvider.GetService<TasksController>() ?? throw new InvalidOperationException();
         }
@@ -52,6 +54,7 @@ namespace TCAdminApiSharp
             ServiceProvider = new ServiceCollection()
                 .AddTransient(_ => this)
                 .AddScoped<ServicesController>()
+                .AddScoped<ServersController>()
                 .AddScoped<UsersController>()
                 .AddScoped<TasksController>()
                 .BuildServiceProvider();

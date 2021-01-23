@@ -240,6 +240,9 @@ namespace TCAdminApiSharp.Entities.Service
 
         [JsonProperty("Notes")] public string Notes { get; set; }
 
+        public User.User User => ServicesController.TcaClient.UsersController.GetUser(this.UserId);
+        public Server.Server Server => ServicesController.TcaClient.ServersController.GetServer(this.ServerId);
+
         public void Update(Action<Service> action)
         {
             var service = new Service();

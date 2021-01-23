@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using TCAdminApiSharp.Controllers;
 using TCAdminApiSharp.Entities.Generic;
@@ -85,6 +86,9 @@ namespace TCAdminApiSharp.Entities.User
         [JsonProperty("TimeZoneId")] public string TimeZoneId { get; set; }
 
         [JsonProperty("UserType")] public UserType UserType { get; set; }
+
+        public IList<Service.Service> Services =>
+            UsersController.TcaClient.ServicesController.GetServicesByUserId(this.UserId).Result;
 
         public void SetPassword(string password)
         {

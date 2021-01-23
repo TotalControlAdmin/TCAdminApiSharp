@@ -7,6 +7,8 @@ using TCAdminApiSharp.Entities.User;
 using TCAdminApiSharp.Exceptions;
 using TCAdminApiSharp.Exceptions.API;
 using TCAdminApiSharp.Querying;
+using TCAdminApiSharp.Querying.Operations;
+using TCAdminApiSharp.Querying.Operators;
 
 namespace TCAdminApiSharp.Controllers
 {
@@ -25,7 +27,7 @@ namespace TCAdminApiSharp.Controllers
             request.AddParameter("createinfo", body, ParameterType.GetOrPost);
             return ExecuteBaseResponseRequest<int>(request).Result;
         }
-        
+
         public ListResponse<Service> FindServices(QueryableInfo query)
         {
             var request = GenerateDefaultRequest();
@@ -35,7 +37,7 @@ namespace TCAdminApiSharp.Controllers
             request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
             return ExecuteListResponseRequest<Service>(request);
         }
-        
+
         public Service GetService(int serviceId)
         {
             try
@@ -48,18 +50,28 @@ namespace TCAdminApiSharp.Controllers
             {
                 if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    throw new NotFoundException(typeof(Service), e, new []{serviceId});
+                    throw new NotFoundException(typeof(Service), e, new[] {serviceId});
                 }
 
                 throw;
             }
         }
-        
+
         public ListResponse<Service> GetServices()
         {
             var request = GenerateDefaultRequest();
             request.Resource += "gameservices";
             return ExecuteListResponseRequest<Service>(request);
+        }
+
+        public ListResponse<Service> GetServicesByBillingId(string billingId)
+        {
+            return FindServices(new QueryableInfo(new WhereList("BillingId", ColumnOperator.Equal, billingId)));
+        }
+
+        public ListResponse<Service> GetServicesByUserId(int userId)
+        {
+            return FindServices(new QueryableInfo(new WhereList("UserId", ColumnOperator.Equal, userId)));
         }
     }
 }
