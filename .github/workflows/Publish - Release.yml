@@ -1,4 +1,4 @@
-name: Deploy to Nuget
+name: Release - Build + Deploy
 
 on:
   push:
