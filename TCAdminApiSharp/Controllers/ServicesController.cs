@@ -3,8 +3,10 @@ using System.Net;
 using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Service;
+using TCAdminApiSharp.Entities.User;
 using TCAdminApiSharp.Exceptions;
 using TCAdminApiSharp.Exceptions.API;
+using TCAdminApiSharp.Querying;
 
 namespace TCAdminApiSharp.Controllers
 {
@@ -22,6 +24,16 @@ namespace TCAdminApiSharp.Controllers
             request.Method = Method.POST;
             request.AddParameter("createinfo", body, ParameterType.GetOrPost);
             return ExecuteBaseResponseRequest<int>(request).Result;
+        }
+        
+        public ListResponse<Service> FindServices(QueryableInfo query)
+        {
+            var request = GenerateDefaultRequest();
+            Logger.Debug(query.BuildQuery());
+            request.Method = Method.POST;
+            request.Resource += "gameservices";
+            request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
+            return ExecuteListResponseRequest<Service>(request);
         }
         
         public Service GetService(int serviceId)
