@@ -304,5 +304,21 @@ namespace TCAdminApiSharp.Entities.Service
             request.Method = Method.POST;
             ServicesController.ExecuteBaseResponseRequest(request);
         }
+        
+        public bool Suspend()
+        {
+            var request = ServicesController.GenerateDefaultRequest();
+            request.Resource += $"suspend/{this.ServiceId}";
+            request.Method = Method.POST;
+            return ServicesController.ExecuteBaseResponseRequest(request).Success;
+        }
+        
+        public bool Unsuspend()
+        {
+            var request = ServicesController.GenerateDefaultRequest();
+            request.Resource += $"unsuspend/{this.ServiceId}";
+            request.Method = Method.POST;
+            return ServicesController.ExecuteBaseResponseRequest(request).Success;
+        }
     }
 }
