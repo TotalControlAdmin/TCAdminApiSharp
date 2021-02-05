@@ -54,7 +54,7 @@ namespace TCAdminApiSharp.Entities.Task
 
         [JsonProperty("RedirectUrl")] public string RedirectUrl { get; set; }
 
-        [JsonIgnore] public IEnumerable<TaskStep> Steps => (List<TaskStep>) TasksController.GetTaskSteps(this.TaskId).Result;
+        [JsonIgnore] public IEnumerable<TaskStep> Steps => (List<TaskStep>) TasksController.GetTaskSteps(this.TaskId).GetAwaiter().GetResult().Result;
 
         [JsonIgnore]
         public TaskStep CurrentStep

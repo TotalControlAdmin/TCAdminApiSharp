@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RestSharp;
@@ -241,10 +242,10 @@ namespace TCAdminApiSharp.Entities.Service
 
         [JsonProperty("Notes")] public string Notes { get; set; }
 
-        [JsonIgnore] public User.User User => ServicesController.TcaClient.UsersController.GetUser(this.UserId);
-        [JsonIgnore] public Server.Server Server => ServicesController.TcaClient.ServersController.GetServer(this.ServerId);
+        [JsonIgnore] public User.User User => ServicesController.TcaClient.UsersController.GetUser(this.UserId).GetAwaiter().GetResult();
+        [JsonIgnore] public Server.Server Server => ServicesController.TcaClient.ServersController.GetServer(this.ServerId).GetAwaiter().GetResult();
 
-        public void Update(Action<Service> action)
+        public async Task<bool> Update(Action<Service> action)
         {
             var service = new Service();
             action(service);
@@ -253,16 +254,16 @@ namespace TCAdminApiSharp.Entities.Service
             request.Resource += this.ServiceId;
             request.Method = Method.PUT;
             request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
-            ServicesController.ExecuteBaseResponseRequest(request);
+            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
         }
 
-        public void Delete()
+        public Task<bool> Delete()
         {
             // todo: Luis hurry up implement pls
             throw new NotImplementedException();
         }
 
-        public void Start(string reason = "")
+        public async Task<bool> Start(string reason = "")
         {
             var request = ServicesController.GenerateDefaultRequest();
             request.Resource += $"start/{this.ServiceId}";
@@ -271,10 +272,10 @@ namespace TCAdminApiSharp.Entities.Service
             {
                 request.AddParameter("reason", reason);
             }
-            ServicesController.ExecuteBaseResponseRequest(request);
+            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
         }
 
-        public void Restart(string reason = "")
+        public async Task<bool> Restart(string reason = "")
         {
             var request = ServicesController.GenerateDefaultRequest();
             request.Resource += $"restart/{this.ServiceId}";
@@ -283,10 +284,10 @@ namespace TCAdminApiSharp.Entities.Service
             {
                 request.AddParameter("reason", reason);
             }
-            ServicesController.ExecuteBaseResponseRequest(request);
+            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
         }
 
-        public void Stop(string reason = "")
+        public async Task<bool> Stop(string reason = "")
         {
             var request = ServicesController.GenerateDefaultRequest();
             request.Resource += $"stop/{this.ServiceId}";
@@ -295,31 +296,31 @@ namespace TCAdminApiSharp.Entities.Service
             {
                 request.AddParameter("reason", reason);
             }
-            ServicesController.ExecuteBaseResponseRequest(request);
+            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
         }
         
-        public void Configure()
+        public async Task<bool> Configure()
         {
             var request = ServicesController.GenerateDefaultRequest();
             request.Resource += $"configure/{this.ServiceId}";
             request.Method = Method.POST;
-            ServicesController.ExecuteBaseResponseRequest(request);
+            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
         }
         
-        public bool Suspend()
+        public async Task<bool> Suspend()
         {
             var request = ServicesController.GenerateDefaultRequest();
             request.Resource += $"suspend/{this.ServiceId}";
             request.Method = Method.POST;
-            return ServicesController.ExecuteBaseResponseRequest(request).Success;
+            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
         }
         
-        public bool Unsuspend()
+        public async Task<bool> Unsuspend()
         {
             var request = ServicesController.GenerateDefaultRequest();
             request.Resource += $"unsuspend/{this.ServiceId}";
             request.Method = Method.POST;
-            return ServicesController.ExecuteBaseResponseRequest(request).Success;
+            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
         }
     }
 }

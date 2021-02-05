@@ -35,37 +35,37 @@ namespace TCAdminApiSharp.Controllers
             return new(BaseResource);
         }
         
-        public BaseResponse ExecuteBaseResponseRequest(RestRequest request)
+        public async Task<BaseResponse> ExecuteBaseResponseRequest(RestRequest request)
         {
-            var response = ExecuteRequest<BaseResponse>(request, out var restResponse);
+            var response = await ExecuteRequest<BaseResponse>(request, out var restResponse);
             response.RestResponse = restResponse;
             return response;
         }
 
-        public BaseResponse<T> ExecuteBaseResponseRequest<T>(RestRequest request)
+        public async Task<BaseResponse<T>> ExecuteBaseResponseRequest<T>(RestRequest request)
         {
-            var response = ExecuteRequest<BaseResponse<T>>(request, out var restResponse);
+            var response = await ExecuteRequest<BaseResponse<T>>(request, out var restResponse);
             response.RestResponse = restResponse;
             return response;
         }
         
-        public ListResponse<T> ExecuteListResponseRequest<T>(RestRequest request)
+        public async Task<ListResponse<T>> ExecuteListResponseRequest<T>(RestRequest request)
         {
-            var response = ExecuteRequest<ListResponse<T>>(request, out var restResponse);
+            var response = await ExecuteRequest<ListResponse<T>>(request, out var restResponse);
             response.RestResponse = restResponse;
             return response;
         }
         
-        public T ExecuteRequest<T>(RestRequest request)
+        public async Task<T> ExecuteRequest<T>(RestRequest request)
         {
-            return ExecuteRequest<T>(request, out _);
+            return await ExecuteRequest<T>(request, out _);
         }
 
-        public T ExecuteRequest<T>(RestRequest request, out IRestResponse restResponse)
+        public Task<T> ExecuteRequest<T>(RestRequest request, out IRestResponse restResponse)
         {
             var (t, restResponse2) = ExecuteRequestAsync<T>(request).ConfigureAwait(false).GetAwaiter().GetResult();
             restResponse = restResponse2;
-            return t;
+            return Task.FromResult(t);
         }
 
         public async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)

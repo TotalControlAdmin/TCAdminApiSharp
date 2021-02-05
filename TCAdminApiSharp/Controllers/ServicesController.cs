@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Service;
@@ -18,33 +19,34 @@ namespace TCAdminApiSharp.Controllers
         {
         }
 
-        public int CreateService(ServiceBuilder builder)
+        public async Task<int> CreateService(ServiceBuilder builder)
         {
             var body = builder.GenerateRequestBody();
             var request = GenerateDefaultRequest();
             request.Resource += "create";
             request.Method = Method.POST;
             request.AddParameter("createinfo", body, ParameterType.GetOrPost);
-            return ExecuteBaseResponseRequest<int>(request).Result;
+            var response = await ExecuteBaseResponseRequest<int>(request);
+            return response.Result;
         }
 
-        public ListResponse<Service> FindServices(QueryableInfo query)
+        public async Task<ListResponse<Service>> FindServices(QueryableInfo query)
         {
             var request = GenerateDefaultRequest();
             Logger.Debug(query.BuildQuery());
             request.Method = Method.POST;
             request.Resource += "gameservices";
             request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
-            return ExecuteListResponseRequest<Service>(request);
+            return await ExecuteListResponseRequest<Service>(request);
         }
 
-        public Service GetService(int serviceId)
+        public async Task<Service> GetService(int serviceId)
         {
             try
             {
                 var request = GenerateDefaultRequest();
                 request.Resource += serviceId;
-                return ExecuteBaseResponseRequest<Service>(request).Result;
+                return (await ExecuteBaseResponseRequest<Service>(request)).Result;
             }
             catch (ApiResponseException e)
             {
@@ -57,19 +59,19 @@ namespace TCAdminApiSharp.Controllers
             }
         }
 
-        public ListResponse<Service> GetServices()
+        public async Task<ListResponse<Service>> GetServices()
         {
             var request = GenerateDefaultRequest();
             request.Resource += "gameservices";
-            return ExecuteListResponseRequest<Service>(request);
+            return await ExecuteListResponseRequest<Service>(request);
         }
 
-        public ListResponse<Service> GetServicesByBillingId(string billingId)
+        public Task<ListResponse<Service>> GetServicesByBillingId(string billingId)
         {
             return FindServices(new QueryableInfo(new WhereList("BillingId", ColumnOperator.Equal, billingId)));
         }
 
-        public ListResponse<Service> GetServicesByUserId(int userId)
+        public Task<ListResponse<Service>> GetServicesByUserId(int userId)
         {
             return FindServices(new QueryableInfo(new WhereList("UserId", ColumnOperator.Equal, userId)));
         }

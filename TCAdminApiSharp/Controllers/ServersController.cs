@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Server;
@@ -25,13 +26,13 @@ namespace TCAdminApiSharp.Controllers
         //     return ExecuteBaseResponseRequest<int>(request).Result;
         // }
         
-        public Server GetServer(int serverId)
+        public async Task<Server> GetServer(int serverId)
         {
             try
             {
                 var request = GenerateDefaultRequest();
                 request.Resource += serverId;
-                return ExecuteBaseResponseRequest<Server>(request).Result;
+                return (await ExecuteBaseResponseRequest<Server>(request)).Result;
             }
             catch (ApiResponseException e)
             {
@@ -44,7 +45,7 @@ namespace TCAdminApiSharp.Controllers
             }
         }
         
-        public ListResponse<Server> GetServices()
+        public Task<ListResponse<Server>> GetServices()
         {
             var request = GenerateDefaultRequest();
             request.Resource += "servers";

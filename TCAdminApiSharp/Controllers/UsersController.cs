@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Threading.Tasks;
 using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.User;
@@ -14,13 +15,14 @@ namespace TCAdminApiSharp.Controllers
         {
         }
         
-        public User GetUser(int userId)
+        public async Task<User> GetUser(int userId)
         {
             try
             {
                 var request = GenerateDefaultRequest();
                 request.Resource += userId;
-                return ExecuteBaseResponseRequest<User>(request).Result;
+                var response = await ExecuteBaseResponseRequest<User>(request);
+                return response.Result;
             }
             catch (ApiResponseException e)
             {
@@ -32,13 +34,14 @@ namespace TCAdminApiSharp.Controllers
             }
         }
         
-        public User GetMe()
+        public async Task<User> GetMe()
         {
             try
             {
                 var request = GenerateDefaultRequest();
                 request.Resource += "me";
-                return ExecuteBaseResponseRequest<User>(request).Result;
+                var response = await ExecuteBaseResponseRequest<User>(request);
+                return response.Result;
             }
             catch (ApiResponseException e)
             {
@@ -50,28 +53,28 @@ namespace TCAdminApiSharp.Controllers
             }
         }
 
-        public ListResponse<User> FindUsers(QueryableInfo query)
+        public async Task<ListResponse<User>> FindUsers(QueryableInfo query)
         {
             var request = GenerateDefaultRequest();
             Logger.Debug(query.BuildQuery());
             request.Method = Method.POST;
             request.Resource += $"users/{TcaClient.GetTokenUserId()}";
             request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
-            return ExecuteListResponseRequest<User>(request);
+            return await ExecuteListResponseRequest<User>(request);
         }
         
-        public ListResponse<User> GetMyUsers()
+        public async Task<ListResponse<User>> GetMyUsers()
         {
             var request = GenerateDefaultRequest();
             request.Resource += "myusers";
-            return ExecuteListResponseRequest<User>(request);
+            return await ExecuteListResponseRequest<User>(request);
         }
         
-        public ListResponse<User> GetUsers()
+        public async Task<ListResponse<User>> GetUsers()
         {
             var request = GenerateDefaultRequest();
             request.Resource += $"users/{TcaClient.GetTokenUserId()}";
-            return ExecuteListResponseRequest<User>(request);
+            return await ExecuteListResponseRequest<User>(request);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Serilog.Events;
@@ -20,25 +21,16 @@ namespace TCAdminApiSharp.Tests
         }
 
         [Test]
-        public void GetServiceTest()
+        public async Task GetServiceTest()
         {
-            var service = _tcaClient.ServicesController.GetService(2);
+            var service = await _tcaClient.ServicesController.GetService(2);
             Assert.AreEqual(2, service.ServiceId);
-        }
-        
-        [Test]
-        public void GetNonExistentServiceTest()
-        {
-            Assert.Catch<NotFoundException>(() =>
-            {
-                var _ = _tcaClient.ServicesController.GetService(0);
-            });
         }
 
         [Test]
-        public void GetServicesListTest()
+        public async Task GetServicesListTest()
         {
-            var services = _tcaClient.ServicesController.GetServices();
+            var services = await _tcaClient.ServicesController.GetServices();
             Assert.AreEqual(2, services.VirtualCount);
         }
         
@@ -56,10 +48,10 @@ namespace TCAdminApiSharp.Tests
         }
         
         [Test]
-        public void UpdateServiceTest()
+        public async Task UpdateServiceTest()
         {
-            var service = _tcaClient.ServicesController.GetService(1);
-            service.Update(x =>
+            var service = await _tcaClient.ServicesController.GetService(1);
+            await service.Update(x =>
             {
                 x.Slots = 12;
                 x.Executable = "changed.exe";
@@ -69,12 +61,12 @@ namespace TCAdminApiSharp.Tests
         }
 
         [Test]
-        public void UpdateServiceExceptionTest()
+        public async Task UpdateServiceExceptionTest()
         {
-            var service = _tcaClient.ServicesController.GetService(2);
+            var service = await _tcaClient.ServicesController.GetService(2);
             try
             {
-                service.Update(x =>
+                await service.Update(x =>
                 {
                     x.Slots = 12;
                     x.Executable = "changed.exe";

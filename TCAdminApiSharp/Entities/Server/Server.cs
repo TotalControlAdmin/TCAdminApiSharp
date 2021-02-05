@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
 using Microsoft.Extensions.DependencyInjection;
@@ -241,7 +242,7 @@ namespace TCAdminApiSharp.Entities.Server
 
         [JsonProperty("DCDownloadPassword")] public string DCDownloadPassword { get; set; }
 
-        public void Update(Action<Server> action)
+        public async Task<bool> Update(Action<Server> action)
         {
             var server = new Server();
             action(server);
@@ -250,10 +251,10 @@ namespace TCAdminApiSharp.Entities.Server
             request.Resource += this.ServerId;
             request.Method = Method.PUT;
             request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
-            ServersController.ExecuteBaseResponseRequest(request);
+            return (await ServersController.ExecuteBaseResponseRequest(request)).Success;
         }
 
-        public void Delete()
+        public Task<bool> Delete()
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace TCAdminApiSharp.Entities.Generic
@@ -18,8 +19,8 @@ namespace TCAdminApiSharp.Entities.Generic
 
     public interface IObjectBaseCrud<out T>
     {
-        public void Update(Action<T> action);
+        public Task<bool> Update(Action<T> action);
 
-        public void Delete();
+        public Task<bool> Delete();
     }
 }

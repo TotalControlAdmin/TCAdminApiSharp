@@ -1,10 +1,12 @@
 ﻿using System.Net;
+using System.Threading.Tasks;
 using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Task;
 using TCAdminApiSharp.Entities.User;
 using TCAdminApiSharp.Exceptions;
 using TCAdminApiSharp.Exceptions.API;
+using Task = TCAdminApiSharp.Entities.Task.Task;
 
 namespace TCAdminApiSharp.Controllers
 {
@@ -14,13 +16,13 @@ namespace TCAdminApiSharp.Controllers
         {
         }
 
-        public Task GetTask(int taskId)
+        public async Task<Task> GetTask(int taskId)
         {
             try
             {
                 var request = GenerateDefaultRequest();
                 request.Resource += taskId;
-                return ExecuteBaseResponseRequest<Task>(request).Result;
+                return (await ExecuteBaseResponseRequest<Task>(request)).Result;
             }
             catch (ApiResponseException e)
             {
@@ -33,7 +35,7 @@ namespace TCAdminApiSharp.Controllers
             }
         }
 
-        public ListResponse<Task> GetPendingTasks(int serverId)
+        public Task<ListResponse<Task>> GetPendingTasks(int serverId)
         {
             var request = GenerateDefaultRequest();
             request.Resource += "getpendingtasks";
@@ -41,7 +43,7 @@ namespace TCAdminApiSharp.Controllers
             return ExecuteListResponseRequest<Task>(request);
         }
         
-        public ListResponse<TaskStep> GetTaskSteps(int taskId)
+        public Task<ListResponse<TaskStep>> GetTaskSteps(int taskId)
         {
             var request = GenerateDefaultRequest();
             request.Resource = "api/taskstep/getsteps";
