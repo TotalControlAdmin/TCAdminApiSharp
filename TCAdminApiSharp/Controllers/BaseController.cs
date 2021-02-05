@@ -37,43 +37,29 @@ namespace TCAdminApiSharp.Controllers
         
         public async Task<BaseResponse> ExecuteBaseResponseRequest(RestRequest request)
         {
-            var response = await ExecuteRequest<BaseResponse>(request, out var restResponse);
-            response.RestResponse = restResponse;
-            return response;
+            var (baseResponse, restResponse) = await ExecuteRequestAsync<BaseResponse>(request);
+            baseResponse.RestResponse = restResponse;
+            return baseResponse;
         }
 
         public async Task<BaseResponse<T>> ExecuteBaseResponseRequest<T>(RestRequest request)
         {
-            var response = await ExecuteRequest<BaseResponse<T>>(request, out var restResponse);
-            response.RestResponse = restResponse;
-            return response;
+            var (item1, item2) = await ExecuteRequestAsync<BaseResponse<T>>(request);
+            item1.RestResponse = item2;
+            return item1;
         }
         
         public async Task<ListResponse<T>> ExecuteListResponseRequest<T>(RestRequest request)
         {
-            var response = await ExecuteRequest<ListResponse<T>>(request, out var restResponse);
-            response.RestResponse = restResponse;
-            return response;
-        }
-        
-        public async Task<T> ExecuteRequest<T>(RestRequest request)
-        {
-            return await ExecuteRequest<T>(request, out _);
-        }
-
-        public Task<T> ExecuteRequest<T>(RestRequest request, out IRestResponse restResponse)
-        {
-            var (t, restResponse2) = ExecuteRequestAsync<T>(request).ConfigureAwait(false).GetAwaiter().GetResult();
-            restResponse = restResponse2;
-            return Task.FromResult(t);
+            var (baseResponse, restResponse) = await ExecuteRequestAsync<ListResponse<T>>(request);
+            baseResponse.RestResponse = restResponse;
+            return baseResponse;
         }
 
         public async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)
         {
-            Logger.Verbose(JsonConvert.SerializeObject(request, Constants.IgnoreReferenceLoop));
             Logger.Debug($"Request URL [{request.Method}]: {TcaClient.RestClient.BuildUri(request)}");
             var restResponse = await TcaClient.RestClient.ExecuteAsync(request);
-            Logger.Verbose(JsonConvert.SerializeObject(restResponse, Constants.IgnoreReferenceLoop));
             Logger.Debug("Response Status: " + restResponse.ResponseStatus);
             Logger.Debug("Status Code: " + restResponse.StatusCode);
             if (restResponse.ResponseStatus != ResponseStatus.Completed)
