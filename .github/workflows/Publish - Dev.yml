@@ -29,4 +29,4 @@ jobs:
         NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
         VERSION_REGEX: ^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$
         VERSION_SUFFIX: -dev-${{steps.datetime.outputs.date}}-${{github.run_number}}
-        TAG_FORMAT: dev-v*-${{steps.datetime.outputs.date}}-${{github.run_number}}
+        TAG_FORMAT: dev-v*
