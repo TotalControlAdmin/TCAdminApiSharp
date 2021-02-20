@@ -15,7 +15,7 @@ namespace TCAdminApiSharp.Entities.Service
     public class Service : ObjectBase, IObjectBaseCrud<Service>, IPowerable
     {
         [JsonIgnore]
-        public readonly ServicesController ServicesController =
+        public static readonly ServicesController Controller =
             TcaClient.ServiceProvider.GetService<ServicesController>() ?? throw new InvalidOperationException();
         
         [JsonProperty("EnableGameSwitching")] public bool EnableGameSwitching { get; set; }
@@ -242,19 +242,19 @@ namespace TCAdminApiSharp.Entities.Service
 
         [JsonProperty("Notes")] public string Notes { get; set; }
 
-        [JsonIgnore] public User.User User => ServicesController.TcaClient.UsersController.GetUser(this.UserId).GetAwaiter().GetResult();
-        [JsonIgnore] public Server.Server Server => ServicesController.TcaClient.ServersController.GetServer(this.ServerId).GetAwaiter().GetResult();
+        [JsonIgnore] public User.User User => Controller.TcaClient.UsersController.GetUser(this.UserId).GetAwaiter().GetResult();
+        [JsonIgnore] public Server.Server Server => Controller.TcaClient.ServersController.GetServer(this.ServerId).GetAwaiter().GetResult();
 
         public async Task<bool> Update(Action<Service> action)
         {
             var service = new Service();
             action(service);
             var putJson = JsonConvert.SerializeObject(service, Constants.IgnoreDefaultValues);
-            var request = ServicesController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += this.ServiceId;
             request.Method = Method.PUT;
             request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
-            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public Task<bool> Delete()
@@ -265,62 +265,62 @@ namespace TCAdminApiSharp.Entities.Service
 
         public async Task<bool> Start(string reason = "")
         {
-            var request = ServicesController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"start/{this.ServiceId}";
             request.Method = Method.POST;
             if (!string.IsNullOrEmpty(reason))
             {
                 request.AddParameter("reason", reason);
             }
-            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public async Task<bool> Restart(string reason = "")
         {
-            var request = ServicesController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"restart/{this.ServiceId}";
             request.Method = Method.POST;
             if (!string.IsNullOrEmpty(reason))
             {
                 request.AddParameter("reason", reason);
             }
-            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public async Task<bool> Stop(string reason = "")
         {
-            var request = ServicesController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"stop/{this.ServiceId}";
             request.Method = Method.POST;
             if (!string.IsNullOrEmpty(reason))
             {
                 request.AddParameter("reason", reason);
             }
-            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
         
         public async Task<bool> Configure()
         {
-            var request = ServicesController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"configure/{this.ServiceId}";
             request.Method = Method.POST;
-            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
         
         public async Task<bool> Suspend()
         {
-            var request = ServicesController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"suspend/{this.ServiceId}";
             request.Method = Method.POST;
-            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
         
         public async Task<bool> Unsuspend()
         {
-            var request = ServicesController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"unsuspend/{this.ServiceId}";
             request.Method = Method.POST;
-            return (await ServicesController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
     }
 }

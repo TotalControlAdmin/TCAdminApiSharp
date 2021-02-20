@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using TCAdminApiSharp.Controllers;
+using TCAdminApiSharp.Entities.Generic;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TCAdminApiSharp.Entities.Task
 {
-    public class TaskStep
+    public class TaskStep : ObjectBase
     {
+        [JsonIgnore] public static readonly TasksController Controller =
+            TcaClient.ServiceProvider.GetService<TasksController>() ?? throw new InvalidOperationException();
+        
         [JsonProperty("ModuleId")]
         public string ModuleId { get; set; }
 

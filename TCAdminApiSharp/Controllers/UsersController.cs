@@ -62,7 +62,7 @@ namespace TCAdminApiSharp.Controllers
             request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
             return await ExecuteListResponseRequest<User>(request);
         }
-        
+
         public async Task<ListResponse<User>> GetMyUsers()
         {
             var request = GenerateDefaultRequest();

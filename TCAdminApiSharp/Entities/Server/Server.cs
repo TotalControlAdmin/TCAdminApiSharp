@@ -11,7 +11,7 @@ namespace TCAdminApiSharp.Entities.Server
 {
     public class Server : ObjectBase, IObjectBaseCrud<Server>
     {
-        [JsonIgnore] public readonly ServersController ServersController =
+        [JsonIgnore] public static readonly ServersController Controller =
             TcaClient.ServiceProvider.GetService<ServersController>() ?? throw new InvalidOperationException();
 
         [JsonProperty("DisableNewServices")] public bool DisableNewServices { get; set; }
@@ -247,11 +247,11 @@ namespace TCAdminApiSharp.Entities.Server
             var server = new Server();
             action(server);
             var putJson = JsonConvert.SerializeObject(server, Constants.IgnoreDefaultValues);
-            var request = ServersController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += this.ServerId;
             request.Method = Method.PUT;
             request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
-            return (await ServersController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public Task<bool> Delete()

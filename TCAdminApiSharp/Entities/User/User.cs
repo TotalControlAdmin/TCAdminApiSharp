@@ -12,7 +12,7 @@ namespace TCAdminApiSharp.Entities.User
 {
     public class User : ObjectBase, IObjectBaseCrud<User>
     {
-        [JsonIgnore] public readonly UsersController UsersController =
+        [JsonIgnore] public static readonly UsersController Controller =
             TcaClient.ServiceProvider.GetService<UsersController>() ?? throw new InvalidOperationException();
 
         [JsonProperty("UserId")] public int UserId { get; set; }
@@ -90,15 +90,15 @@ namespace TCAdminApiSharp.Entities.User
         [JsonProperty("UserType")] public UserType UserType { get; set; }
 
         [JsonIgnore] public IList<Service.Service> Services =>
-            UsersController.TcaClient.ServicesController.GetServicesByUserId(this.UserId).GetAwaiter().GetResult().Result;
+            Controller.TcaClient.ServicesController.GetServicesByUserId(this.UserId).GetAwaiter().GetResult().Result;
 
         public async Task<bool> SetPassword(string password)
         {
-            var request = UsersController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"setpassword/{UserId}";
             request.Method = Method.POST;
             request.AddParameter("password", password, ParameterType.GetOrPost);
-            return (await UsersController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public async Task<bool> Update(Action<User> action)
@@ -106,11 +106,11 @@ namespace TCAdminApiSharp.Entities.User
             var service = new User();
             action(service);
             var putJson = JsonConvert.SerializeObject(service, Constants.IgnoreDefaultValues);
-            var request = UsersController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += this.UserId;
             request.Method = Method.PUT;
             request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
-            return (await UsersController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public Task<bool> Delete()
@@ -120,22 +120,22 @@ namespace TCAdminApiSharp.Entities.User
         
         public async Task<bool> Suspend(bool recursive = true, bool suspendServices = true)
         {
-            var request = UsersController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"suspend/{this.UserId}";
             request.Method = Method.POST;
             request.AddParameter(nameof(recursive), recursive, ParameterType.GetOrPost);
             request.AddParameter(nameof(suspendServices), suspendServices, ParameterType.GetOrPost);
-            return (await UsersController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
         
         public async Task<bool> Unsuspend(bool recursive = true, bool enableServices = true)
         {
-            var request = UsersController.GenerateDefaultRequest();
+            var request = Controller.GenerateDefaultRequest();
             request.Resource += $"unsuspend/{this.UserId}";
             request.Method = Method.POST;
             request.AddParameter(nameof(recursive), recursive, ParameterType.GetOrPost);
             request.AddParameter(nameof(enableServices), enableServices, ParameterType.GetOrPost);
-            return (await UsersController.ExecuteBaseResponseRequest(request)).Success;
+            return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
     }
 }
