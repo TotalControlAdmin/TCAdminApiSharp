@@ -17,7 +17,7 @@ namespace TCAdminApiSharp.Controllers
         public readonly TcaClient TcaClient =
             TcaClient.ServiceProvider.GetService<TcaClient>() ?? throw new InvalidOperationException();
         public readonly string BaseResource;
-        public readonly ILogger Logger;
+        internal readonly ILogger Logger;
 
         protected BaseController(string baseResource)
         {
