@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RestSharp;
 using TCAdminApiSharp.Querying.Operators;
 using TCAdminApiSharp.Querying.Structs;
 
@@ -11,27 +12,30 @@ namespace TCAdminApiSharp.Querying.Operations
 {
     public class WhereList : List<WhereInfo>, IQueryOperation
     {
-        [JsonIgnore] public string JsonKey { get; set; } = "Where";
-        [JsonIgnore] public WhereOperator WhereOperator { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore] public string JsonKey { get; set; } = "Where";
+        [System.Text.Json.Serialization.JsonIgnore] public WhereOperator WhereOperator { get; set; }
 
-        public WhereList() => this.WhereOperator = WhereOperator.And;
+        public WhereList()
+        {
+            WhereOperator = WhereOperator.And;
+        }
 
         public WhereList(WhereInfo where)
         {
-            this.WhereOperator = WhereOperator.And;
-            this.Add(where);
+            WhereOperator = WhereOperator.And;
+            Add(where);
         }
 
         public WhereList(string column, object value)
         {
-            this.WhereOperator = WhereOperator.And;
-            this.Add(column, ColumnOperator.Equal, RuntimeHelpers.GetObjectValue(value));
+            WhereOperator = WhereOperator.And;
+            Add(column, ColumnOperator.Equal, RuntimeHelpers.GetObjectValue(value));
         }
 
         public WhereList(string column, ColumnOperator @operator, object value)
         {
-            this.WhereOperator = WhereOperator.And;
-            this.Add(new WhereInfo
+            WhereOperator = WhereOperator.And;
+            Add(new WhereInfo
             {
                 Column = column,
                 ColumnOperator = @operator,
@@ -39,15 +43,20 @@ namespace TCAdminApiSharp.Querying.Operations
             });
         }
 
-        public void Add(string column, object value) =>
-            this.Add(column, ColumnOperator.Equal, RuntimeHelpers.GetObjectValue(value));
-
-        public void Add(string column, ColumnOperator @operator, object value) => this.Add(new WhereInfo
+        public void Add(string column, object value)
         {
-            Column = column,
-            ColumnOperator = @operator,
-            ColumnValue = value
-        });
+            Add(column, ColumnOperator.Equal, RuntimeHelpers.GetObjectValue(value));
+        }
+
+        public void Add(string column, ColumnOperator @operator, object value)
+        {
+            Add(new WhereInfo
+            {
+                Column = column,
+                ColumnOperator = @operator,
+                ColumnValue = value
+            });
+        }
 
         public JToken GenerateQuery()
         {
@@ -56,17 +65,29 @@ namespace TCAdminApiSharp.Querying.Operations
             {
                 temp += $"[{info.Column}] {ConvertColumnOperator(info.ColumnOperator)} '{info.ColumnValue}'";
                 if (!this.Last().Equals(info))
-                {
                     // Add where operator
-                    temp += $" {this.WhereOperator.ToString().ToUpper()} ";
-                }
+                    temp += $" {WhereOperator.ToString().ToUpper()} ";
             }
 
             temp += ")";
             return new JValue(temp);
         }
 
-        public string ConvertColumnOperator(ColumnOperator columnOperator)
+        public void ModifyRequest(IRestRequest request)
+        {
+            JObject jObject = new();
+            var queryInfoExists = request.Parameters.Any(x => x.Name == "queryInfo");
+            if (queryInfoExists)
+            {
+                jObject = JsonConvert.DeserializeObject<JObject>(request.Parameters.Find(x => x.Name == "queryInfo")!.Value!.ToString()!);
+            }
+
+            jObject[JsonKey] = GenerateQuery();
+
+            request.AddOrUpdateParameter("queryInfo", jObject, ParameterType.GetOrPost);
+        }
+
+        public static string ConvertColumnOperator(ColumnOperator columnOperator)
         {
             return columnOperator switch
             {

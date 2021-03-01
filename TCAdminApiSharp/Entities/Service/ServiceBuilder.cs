@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using TCAdminApiSharp.Entities.Generic;
 using TCAdminApiSharp.Helpers;
+
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMethodReturnValue.Global
 
@@ -41,7 +42,7 @@ namespace TCAdminApiSharp.Entities.Service
             _service.UserId = id;
             return this;
         }
-        
+
         public ServiceBuilder WithUser(User.User user)
         {
             _service.UserId = user.UserId;
@@ -92,7 +93,7 @@ namespace TCAdminApiSharp.Entities.Service
 
         public ServiceBuilder WithPriority(ProcessPriorityClass priority)
         {
-            _service.Priority = (int)priority;
+            _service.Priority = (int) priority;
             return this;
         }
 
@@ -176,11 +177,8 @@ namespace TCAdminApiSharp.Entities.Service
 
         internal string GenerateRequestBody()
         {
-            var jo = JObject.FromObject(this._service, JsonSerializer.Create(Constants.IgnoreDefaultValues));
-            foreach (var keyValuePair in _extraData)
-            {
-                jo.Add(keyValuePair.Key, new JValue(keyValuePair.Value));
-            }
+            var jo = JObject.FromObject(_service, JsonSerializer.Create(Constants.IgnoreDefaultValues));
+            foreach (var keyValuePair in _extraData) jo.Add(keyValuePair.Key, new JValue(keyValuePair.Value));
             _logger.Debug(jo.ToString());
 
             return jo.ToString();

@@ -12,7 +12,7 @@ namespace TCAdminApiSharp.Entities.User
 {
     public class User : ObjectBase, IObjectBaseCrud<User>
     {
-        [JsonIgnore] public static readonly UsersController Controller =
+        [JsonIgnore] private static readonly UsersController Controller =
             TcaClient.ServiceProvider.GetService<UsersController>() ?? throw new InvalidOperationException();
 
         [JsonProperty("UserId")] public int UserId { get; set; }
@@ -89,8 +89,9 @@ namespace TCAdminApiSharp.Entities.User
 
         [JsonProperty("UserType")] public UserType UserType { get; set; }
 
-        [JsonIgnore] public IList<Service.Service> Services =>
-            Controller.TcaClient.ServicesController.GetServicesByUserId(this.UserId).GetAwaiter().GetResult().Result;
+        [JsonIgnore]
+        public IList<Service.Service> Services =>
+            Controller.TcaClient.ServicesController.GetServicesByUserId(UserId).GetAwaiter().GetResult().Result;
 
         public async Task<bool> SetPassword(string password)
         {
@@ -107,7 +108,7 @@ namespace TCAdminApiSharp.Entities.User
             action(service);
             var putJson = JsonConvert.SerializeObject(service, Constants.IgnoreDefaultValues);
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += this.UserId;
+            request.Resource += UserId;
             request.Method = Method.PUT;
             request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
@@ -117,21 +118,21 @@ namespace TCAdminApiSharp.Entities.User
         {
             throw new NotImplementedException();
         }
-        
+
         public async Task<bool> Suspend(bool recursive = true, bool suspendServices = true)
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"suspend/{this.UserId}";
+            request.Resource += $"suspend/{UserId}";
             request.Method = Method.POST;
             request.AddParameter(nameof(recursive), recursive, ParameterType.GetOrPost);
             request.AddParameter(nameof(suspendServices), suspendServices, ParameterType.GetOrPost);
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
-        
+
         public async Task<bool> Unsuspend(bool recursive = true, bool enableServices = true)
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"unsuspend/{this.UserId}";
+            request.Resource += $"unsuspend/{UserId}";
             request.Method = Method.POST;
             request.AddParameter(nameof(recursive), recursive, ParameterType.GetOrPost);
             request.AddParameter(nameof(enableServices), enableServices, ParameterType.GetOrPost);

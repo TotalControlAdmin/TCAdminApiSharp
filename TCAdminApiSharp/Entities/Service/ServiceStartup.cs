@@ -4,6 +4,6 @@
     {
         Automatic = 2,
         Manual = 3,
-        Disabled = 4,
+        Disabled = 4
     }
 }

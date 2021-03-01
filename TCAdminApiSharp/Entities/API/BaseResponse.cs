@@ -9,18 +9,18 @@ namespace TCAdminApiSharp.Entities.API
         [JsonProperty("Success")] public bool Success { get; private set; } = true;
 
         [JsonProperty("Message")] public string? Message { get; private set; }
-        
+
         public IRestResponse RestResponse { get; internal set; }
 
         internal BaseResponse()
         {
         }
     }
-    
+
     public class BaseResponse<T> : BaseResponse
     {
         [JsonProperty("Result")] public T Result { get; private set; }
-        
+
         internal BaseResponse()
         {
         }

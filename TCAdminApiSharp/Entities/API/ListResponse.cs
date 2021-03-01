@@ -8,6 +8,7 @@ namespace TCAdminApiSharp.Entities.API
         /// <summary>
         /// Only returns when "RowCount" was specified in the request.
         /// </summary>
-        [JsonProperty("VirtualCount")] public int VirtualCount { get; internal set; }
+        [JsonProperty("VirtualCount")]
+        public int VirtualCount { get; internal set; }
     }
 }

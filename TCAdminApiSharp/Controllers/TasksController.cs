@@ -27,9 +27,7 @@ namespace TCAdminApiSharp.Controllers
             catch (ApiResponseException e)
             {
                 if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                {
                     throw new NotFoundException(typeof(Task), e, new[] {taskId});
-                }
 
                 throw;
             }
@@ -42,7 +40,7 @@ namespace TCAdminApiSharp.Controllers
             request.AddParameter("serverId", serverId, ParameterType.QueryString);
             return ExecuteListResponseRequest<Task>(request);
         }
-        
+
         public Task<ListResponse<TaskStep>> GetTaskSteps(int taskId)
         {
             var request = GenerateDefaultRequest();

@@ -4,6 +4,6 @@
     {
         User = 1,
         SubAdmin = 2,
-        Admin = 3,
+        Admin = 3
     }
 }

@@ -14,7 +14,7 @@ namespace TCAdminApiSharp.Controllers
         public UsersController() : base("api/user")
         {
         }
-        
+
         public async Task<User> GetUser(int userId)
         {
             try
@@ -27,13 +27,11 @@ namespace TCAdminApiSharp.Controllers
             catch (ApiResponseException e)
             {
                 if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                {
-                    throw new NotFoundException(typeof(User), e, new []{userId});
-                }
+                    throw new NotFoundException(typeof(User), e, new[] {userId});
                 throw;
             }
         }
-        
+
         public async Task<User> GetMe()
         {
             try
@@ -46,9 +44,7 @@ namespace TCAdminApiSharp.Controllers
             catch (ApiResponseException e)
             {
                 if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                {
-                    throw new NotFoundException(typeof(User), e, new []{TcaClient.GetTokenUserId()});
-                }
+                    throw new NotFoundException(typeof(User), e, new[] {TcaClient.GetTokenUserId()});
                 throw;
             }
         }
@@ -56,10 +52,11 @@ namespace TCAdminApiSharp.Controllers
         public async Task<ListResponse<User>> FindUsers(QueryableInfo query)
         {
             var request = GenerateDefaultRequest();
-            Logger.Debug(query.BuildQuery());
+            // Logger.Debug(query.BuildQuery(request));
             request.Method = Method.POST;
             request.Resource += $"users/{TcaClient.GetTokenUserId()}";
-            request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
+            // request.AddParameter("queryInfo", query.BuildQuery(request), ParameterType.GetOrPost);
+            query.BuildQuery(request);
             return await ExecuteListResponseRequest<User>(request);
         }
 
@@ -69,7 +66,7 @@ namespace TCAdminApiSharp.Controllers
             request.Resource += "myusers";
             return await ExecuteListResponseRequest<User>(request);
         }
-        
+
         public async Task<ListResponse<User>> GetUsers()
         {
             var request = GenerateDefaultRequest();

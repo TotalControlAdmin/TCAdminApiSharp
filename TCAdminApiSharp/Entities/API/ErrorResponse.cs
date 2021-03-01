@@ -16,7 +16,8 @@ namespace TCAdminApiSharp.Entities.API
             {
                 throw new Exception("Couldn't parse API error to object!", e);
             }
-            this.RestResponse = restResponse;
+
+            RestResponse = restResponse;
         }
     }
 }

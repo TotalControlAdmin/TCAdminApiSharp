@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -9,15 +8,15 @@ using TCAdminApiSharp.Controllers;
 using TCAdminApiSharp.Entities.Billing;
 using TCAdminApiSharp.Entities.Generic;
 using TCAdminApiSharp.Helpers;
+// ReSharper disable UnusedMember.Global
 
 namespace TCAdminApiSharp.Entities.Service
 {
     public class Service : ObjectBase, IObjectBaseCrud<Service>, IPowerable
     {
-        [JsonIgnore]
-        public static readonly ServicesController Controller =
+        [JsonIgnore] private static readonly ServicesController Controller =
             TcaClient.ServiceProvider.GetService<ServicesController>() ?? throw new InvalidOperationException();
-        
+
         [JsonProperty("EnableGameSwitching")] public bool EnableGameSwitching { get; set; }
 
         [JsonProperty("DisableQueryMonitoring")]
@@ -242,8 +241,13 @@ namespace TCAdminApiSharp.Entities.Service
 
         [JsonProperty("Notes")] public string Notes { get; set; }
 
-        [JsonIgnore] public User.User User => Controller.TcaClient.UsersController.GetUser(this.UserId).GetAwaiter().GetResult();
-        [JsonIgnore] public Server.Server Server => Controller.TcaClient.ServersController.GetServer(this.ServerId).GetAwaiter().GetResult();
+        [JsonIgnore]
+        public User.User User => Controller.TcaClient.UsersController.GetUser(UserId).ConfigureAwait(false).GetAwaiter()
+            .GetResult();
+
+        [JsonIgnore]
+        public Server.Server Server =>
+            Controller.TcaClient.ServersController.GetServer(ServerId).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public async Task<bool> Update(Action<Service> action)
         {
@@ -251,7 +255,7 @@ namespace TCAdminApiSharp.Entities.Service
             action(service);
             var putJson = JsonConvert.SerializeObject(service, Constants.IgnoreDefaultValues);
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += this.ServiceId;
+            request.Resource += ServiceId;
             request.Method = Method.PUT;
             request.AddParameter(Constants.JsonContentType, putJson, ParameterType.RequestBody);
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
@@ -266,59 +270,50 @@ namespace TCAdminApiSharp.Entities.Service
         public async Task<bool> Start(string reason = "")
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"start/{this.ServiceId}";
+            request.Resource += $"start/{ServiceId}";
             request.Method = Method.POST;
-            if (!string.IsNullOrEmpty(reason))
-            {
-                request.AddParameter("reason", reason);
-            }
+            if (!string.IsNullOrEmpty(reason)) request.AddParameter("reason", reason);
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public async Task<bool> Restart(string reason = "")
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"restart/{this.ServiceId}";
+            request.Resource += $"restart/{ServiceId}";
             request.Method = Method.POST;
-            if (!string.IsNullOrEmpty(reason))
-            {
-                request.AddParameter("reason", reason);
-            }
+            if (!string.IsNullOrEmpty(reason)) request.AddParameter("reason", reason);
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
 
         public async Task<bool> Stop(string reason = "")
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"stop/{this.ServiceId}";
+            request.Resource += $"stop/{ServiceId}";
             request.Method = Method.POST;
-            if (!string.IsNullOrEmpty(reason))
-            {
-                request.AddParameter("reason", reason);
-            }
+            if (!string.IsNullOrEmpty(reason)) request.AddParameter("reason", reason);
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
-        
+
         public async Task<bool> Configure()
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"configure/{this.ServiceId}";
+            request.Resource += $"configure/{ServiceId}";
             request.Method = Method.POST;
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
-        
+
         public async Task<bool> Suspend()
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"suspend/{this.ServiceId}";
+            request.Resource += $"suspend/{ServiceId}";
             request.Method = Method.POST;
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }
-        
+
         public async Task<bool> Unsuspend()
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"unsuspend/{this.ServiceId}";
+            request.Resource += $"unsuspend/{ServiceId}";
             request.Method = Method.POST;
             return (await Controller.ExecuteBaseResponseRequest(request)).Success;
         }

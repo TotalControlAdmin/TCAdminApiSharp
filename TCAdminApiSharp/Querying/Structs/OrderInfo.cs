@@ -6,11 +6,9 @@ namespace TCAdminApiSharp.Querying.Structs
 {
     public struct OrderInfo
     {
-        [JsonProperty("Field")]
-        public string Column;
-        
-        [JsonProperty("Direction")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonProperty("Field")] public string Column;
+
+        [JsonProperty("Direction")] [JsonConverter(typeof(StringEnumConverter))]
         public OrderOperator Operator;
     }
 }

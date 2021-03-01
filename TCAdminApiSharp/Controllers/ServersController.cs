@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
-using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Server;
 using TCAdminApiSharp.Entities.Service;
@@ -25,7 +23,7 @@ namespace TCAdminApiSharp.Controllers
         //     request.AddParameter("createinfo", body, ParameterType.GetOrPost);
         //     return ExecuteBaseResponseRequest<int>(request).Result;
         // }
-        
+
         public async Task<Server> GetServer(int serverId)
         {
             try
@@ -37,15 +35,13 @@ namespace TCAdminApiSharp.Controllers
             catch (ApiResponseException e)
             {
                 if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                {
-                    throw new NotFoundException(typeof(Service), e, new []{serverId});
-                }
+                    throw new NotFoundException(typeof(Service), e, new[] {serverId});
 
                 throw;
             }
         }
-        
-        public Task<ListResponse<Server>> GetServices()
+
+        public Task<ListResponse<Server>> GetServers()
         {
             var request = GenerateDefaultRequest();
             request.Resource += "servers";

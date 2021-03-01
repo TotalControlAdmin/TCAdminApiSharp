@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RestSharp;
 
 namespace TCAdminApiSharp.Querying
 {
@@ -25,23 +26,15 @@ namespace TCAdminApiSharp.Querying
 
         public QueryableInfo(params IQueryOperation[] queryOperations)
         {
-            foreach (var queryOperation in queryOperations)
-            {
-                QueryOperations.Add(queryOperation);
-            }
+            foreach (var queryOperation in queryOperations) QueryOperations.Add(queryOperation);
         }
 
-        public string BuildQuery()
+        public void BuildQuery(IRestRequest request)
         {
-            var jObject = JObject.FromObject(this);
             foreach (var queryOperation in QueryOperations)
             {
-                jObject.Add(queryOperation.JsonKey, queryOperation.GenerateQuery());
+                queryOperation.ModifyRequest(request);
             }
-            return JsonConvert.SerializeObject(jObject, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-            });
         }
     }
 }

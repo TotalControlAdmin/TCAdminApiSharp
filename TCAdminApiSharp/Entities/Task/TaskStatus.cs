@@ -7,6 +7,6 @@
         Scheduled,
         Completed,
         Canceled,
-        TaskError,
+        TaskError
     }
 }

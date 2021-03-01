@@ -12,7 +12,6 @@ namespace TCAdminApiSharp.Exceptions.API
 
         internal ApiResponseException()
         {
-            
         }
 
         internal ApiResponseException(IRestResponse restResponse) : this()

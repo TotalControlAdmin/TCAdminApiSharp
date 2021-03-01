@@ -11,7 +11,7 @@ namespace TCAdminApiSharp.Entities.Task
 {
     public class Task : ObjectBase
     {
-        [JsonIgnore] public static readonly TasksController Controller =
+        [JsonIgnore] private static readonly TasksController Controller =
             TcaClient.ServiceProvider.GetService<TasksController>() ?? throw new InvalidOperationException();
 
         [JsonProperty("TaskId")] public int TaskId { get; set; }
@@ -54,26 +54,31 @@ namespace TCAdminApiSharp.Entities.Task
 
         [JsonProperty("RedirectUrl")] public string RedirectUrl { get; set; }
 
-        [JsonIgnore] public IEnumerable<TaskStep> Steps => (List<TaskStep>) Controller.GetTaskSteps(this.TaskId).GetAwaiter().GetResult().Result;
+        [JsonIgnore]
+        public IEnumerable<TaskStep> Steps =>
+            (List<TaskStep>) Controller.GetTaskSteps(TaskId).GetAwaiter().GetResult().Result;
 
         [JsonIgnore]
         public TaskStep CurrentStep
         {
-            get { return Steps.FirstOrDefault(x => x.StepId == this.CurrentStepId) ?? throw new InvalidOperationException(); }
+            get
+            {
+                return Steps.FirstOrDefault(x => x.StepId == CurrentStepId) ?? throw new InvalidOperationException();
+            }
         }
 
         public async System.Threading.Tasks.Task Start()
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"start/{this.TaskId}";
+            request.Resource += $"start/{TaskId}";
             request.Method = Method.POST;
             await Controller.ExecuteBaseResponseRequest(request);
         }
-        
+
         public async System.Threading.Tasks.Task Cancel()
         {
             var request = Controller.GenerateDefaultRequest();
-            request.Resource += $"cancel/{this.TaskId}";
+            request.Resource += $"cancel/{TaskId}";
             request.Method = Method.POST;
             await Controller.ExecuteBaseResponseRequest(request);
         }

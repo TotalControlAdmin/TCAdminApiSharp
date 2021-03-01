@@ -4,11 +4,13 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using Serilog;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Exceptions.API;
 using TCAdminApiSharp.Helpers;
+using TCAdminApiSharp.Querying;
 
 namespace TCAdminApiSharp.Controllers
 {
@@ -16,6 +18,7 @@ namespace TCAdminApiSharp.Controllers
     {
         public readonly TcaClient TcaClient =
             TcaClient.ServiceProvider.GetService<TcaClient>() ?? throw new InvalidOperationException();
+
         public readonly string BaseResource;
         internal readonly ILogger Logger;
 
@@ -24,10 +27,7 @@ namespace TCAdminApiSharp.Controllers
             Logger = Log.ForContext(GetType());
             BaseResource = baseResource;
 
-            if (!baseResource.EndsWith("/"))
-            {
-                BaseResource = baseResource + "/";
-            }
+            if (!baseResource.EndsWith("/")) BaseResource = baseResource + "/";
         }
 
         public RestRequest GenerateDefaultRequest()
@@ -35,6 +35,28 @@ namespace TCAdminApiSharp.Controllers
             return new(BaseResource);
         }
         
+        public async Task<BaseResponse<T>> AdvancedRequest<T>(string resource, QueryableInfo query, Method method = Method.POST)
+        {
+            var request = GenerateDefaultRequest();
+            // Logger.Debug(query.BuildQuery());
+            request.Method = method;
+            request.Resource += resource;
+            // request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
+            query.BuildQuery(request);
+            return await ExecuteBaseResponseRequest<T>(request);
+        }
+        
+        public async Task<ListResponse<T>> AdvancedListRequest<T>(string resource, QueryableInfo query, Method method = Method.POST)
+        {
+            var request = GenerateDefaultRequest();
+            // Logger.Debug(query.BuildQuery());
+            request.Method = method;
+            request.Resource += resource;
+            // request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
+            query.BuildQuery(request);
+            return await ExecuteListResponseRequest<T>(request);
+        }
+
         public async Task<BaseResponse> ExecuteBaseResponseRequest(RestRequest request)
         {
             var (baseResponse, restResponse) = await ExecuteRequestAsync<BaseResponse>(request);
@@ -48,7 +70,7 @@ namespace TCAdminApiSharp.Controllers
             item1.RestResponse = item2;
             return item1;
         }
-        
+
         public async Task<ListResponse<T>> ExecuteListResponseRequest<T>(RestRequest request)
         {
             var (baseResponse, restResponse) = await ExecuteRequestAsync<ListResponse<T>>(request);
@@ -62,38 +84,38 @@ namespace TCAdminApiSharp.Controllers
             var restResponse = await TcaClient.RestClient.ExecuteAsync(request);
             Logger.Debug("Response Status: " + restResponse.ResponseStatus);
             Logger.Debug("Status Code: " + restResponse.StatusCode);
+            Logger.Debug("Parameters:");
+            foreach (var requestParameter in request.Parameters)
+            {
+                Logger.Debug(requestParameter.ToString());
+            }
             if (restResponse.ResponseStatus != ResponseStatus.Completed)
             {
                 if (!TcaClient.Settings.ThrowOnApiResponseStatusNonComplete)
-                {
                     return new Tuple<T, IRestResponse>(default!, restResponse);
-                }
                 throw new ApiResponseException(restResponse, "Response Status is: " + restResponse.ResponseStatus);
             }
 
             if (restResponse.StatusCode != HttpStatusCode.OK)
             {
                 if (!TcaClient.Settings.ThrowOnApiStatusCodeNonOk)
-                {
                     return new Tuple<T, IRestResponse>(default!, restResponse);
-                }
                 throw new ApiResponseException(restResponse, "Status code is: " + restResponse.StatusCode);
             }
 
-            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<object>>(restResponse.Content); // First deserialize to the base response
+            var baseResponse =
+                JsonConvert.DeserializeObject<BaseResponse<object>>(restResponse
+                    .Content); // First deserialize to the base response
             baseResponse.RestResponse = restResponse;
             if (!baseResponse.Success)
             {
                 var tType = typeof(T);
                 if (tType.GenericTypeArguments.Contains(baseResponse.Result.GetType()))
-                {
-                    return new Tuple<T, IRestResponse>(JsonConvert.DeserializeObject<T>(restResponse.Content), restResponse);
-                }
+                    return new Tuple<T, IRestResponse>(JsonConvert.DeserializeObject<T>(restResponse.Content),
+                        restResponse);
 
                 if (!TcaClient.Settings.ThrowOnApiSuccessFailure)
-                {
                     return new Tuple<T, IRestResponse>(default!, restResponse);
-                }
                 throw new ApiResponseException(restResponse, "API returned an error");
             }
 

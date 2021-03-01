@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Service;
@@ -33,10 +34,11 @@ namespace TCAdminApiSharp.Controllers
         public async Task<ListResponse<Service>> FindServices(QueryableInfo query)
         {
             var request = GenerateDefaultRequest();
-            Logger.Debug(query.BuildQuery());
+            // Logger.Debug(query.BuildQuery());
             request.Method = Method.POST;
             request.Resource += "gameservices";
-            request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
+            // request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
+            query.BuildQuery(request);
             return await ExecuteListResponseRequest<Service>(request);
         }
 
@@ -51,9 +53,7 @@ namespace TCAdminApiSharp.Controllers
             catch (ApiResponseException e)
             {
                 if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                {
                     throw new NotFoundException(typeof(Service), e, new[] {serviceId});
-                }
 
                 throw;
             }

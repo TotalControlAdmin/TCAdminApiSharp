@@ -4,6 +4,7 @@ using RestSharp;
 using Serilog;
 using Serilog.Events;
 using TCAdminApiSharp.Controllers;
+
 // ReSharper disable NotAccessedField.Global
 
 namespace TCAdminApiSharp
@@ -24,35 +25,31 @@ namespace TCAdminApiSharp
         {
             clientSettings ??= TcaClientSettings.Default;
             SetupDefaultLogger(clientSettings.MinimumLogLevel);
-            CreateHostBuilder();
-            if (string.IsNullOrEmpty(host))
-            {
-                throw new ArgumentException("Parameter is null/empty", nameof(host));
-            }
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                throw new ArgumentException("Parameter is null/empty", nameof(apiKey));
-            }
-            
+            InitializeDI();
+            if (string.IsNullOrEmpty(host)) throw new ArgumentException("Parameter is null/empty", nameof(host));
+            if (string.IsNullOrEmpty(apiKey)) throw new ArgumentException("Parameter is null/empty", nameof(apiKey));
+
             Settings = clientSettings;
             Host = host;
             _apiKey = apiKey;
 
             RestClient = new RestClient(Host);
             RestClient.AddDefaultHeader("api_key", apiKey);
-            
-            ServicesController = ServiceProvider.GetService<ServicesController>() ?? throw new InvalidOperationException();
-            ServersController = ServiceProvider.GetService<ServersController>() ?? throw new InvalidOperationException();
+
+            ServicesController = ServiceProvider.GetService<ServicesController>() ??
+                                 throw new InvalidOperationException();
+            ServersController =
+                ServiceProvider.GetService<ServersController>() ?? throw new InvalidOperationException();
             UsersController = ServiceProvider.GetService<UsersController>() ?? throw new InvalidOperationException();
             TasksController = ServiceProvider.GetService<TasksController>() ?? throw new InvalidOperationException();
         }
 
         internal int GetTokenUserId()
         {
-            return int.Parse(this._apiKey.Split('#')[0]);
+            return int.Parse(_apiKey.Split('#')[0]);
         }
 
-        private void CreateHostBuilder()
+        private void InitializeDI()
         {
             ServiceProvider = new ServiceCollection()
                 .AddTransient(_ => this)

@@ -12,6 +12,6 @@
         Running = 4,
         Resuming = 5,
         Pausing = 6,
-        Paused = 7,
+        Paused = 7
     }
 }

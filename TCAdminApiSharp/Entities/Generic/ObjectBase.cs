@@ -7,7 +7,7 @@ namespace TCAdminApiSharp.Entities.Generic
     public class ObjectBase
     {
         [JsonProperty("AppData")] public TcaXmlField AppData { get; set; }
-        
+
         [JsonProperty("CreatedOn")] public DateTime CreatedOn { get; set; }
 
         [JsonProperty("CreatedBy")] public int CreatedBy { get; set; }
