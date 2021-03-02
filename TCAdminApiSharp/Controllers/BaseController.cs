@@ -4,12 +4,10 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RestSharp;
 using Serilog;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Exceptions.API;
-using TCAdminApiSharp.Helpers;
 using TCAdminApiSharp.Querying;
 
 namespace TCAdminApiSharp.Controllers
@@ -38,10 +36,8 @@ namespace TCAdminApiSharp.Controllers
         public async Task<BaseResponse<T>> AdvancedRequest<T>(string resource, QueryableInfo query, Method method = Method.POST)
         {
             var request = GenerateDefaultRequest();
-            // Logger.Debug(query.BuildQuery());
             request.Method = method;
             request.Resource += resource;
-            // request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
             query.BuildQuery(request);
             return await ExecuteBaseResponseRequest<T>(request);
         }
@@ -49,10 +45,8 @@ namespace TCAdminApiSharp.Controllers
         public async Task<ListResponse<T>> AdvancedListRequest<T>(string resource, QueryableInfo query, Method method = Method.POST)
         {
             var request = GenerateDefaultRequest();
-            // Logger.Debug(query.BuildQuery());
             request.Method = method;
             request.Resource += resource;
-            // request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
             query.BuildQuery(request);
             return await ExecuteListResponseRequest<T>(request);
         }

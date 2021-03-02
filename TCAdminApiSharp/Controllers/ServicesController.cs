@@ -34,10 +34,8 @@ namespace TCAdminApiSharp.Controllers
         public async Task<ListResponse<Service>> FindServices(QueryableInfo query)
         {
             var request = GenerateDefaultRequest();
-            // Logger.Debug(query.BuildQuery());
             request.Method = Method.POST;
             request.Resource += "gameservices";
-            // request.AddParameter("queryInfo", query.BuildQuery(), ParameterType.GetOrPost);
             query.BuildQuery(request);
             return await ExecuteListResponseRequest<Service>(request);
         }
