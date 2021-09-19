@@ -94,7 +94,7 @@ namespace TCAdminApiSharp.Controllers
             {
                 if (!TcaClient.Settings.ThrowOnApiStatusCodeNonOk)
                     return new Tuple<T, IRestResponse>(default!, restResponse);
-                throw new ApiResponseException(restResponse, "Status code is: " + restResponse.StatusCode);
+                throw new ApiResponseException(restResponse, $"Status code is: {restResponse.StatusCode}\n{restResponse.Content}");
             }
 
             var baseResponse =

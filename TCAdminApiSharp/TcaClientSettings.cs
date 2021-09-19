@@ -4,7 +4,7 @@ namespace TCAdminApiSharp
 {
     public class TcaClientSettings
     {
-        public LogEventLevel MinimumLogLevel { get; set; } = LogEventLevel.Information;
+        public LogEventLevel MinimumLogLevel { get; set; } = LogEventLevel.Error;
         public bool ThrowOnApiSuccessFailure { get; set; } = true;
 
         public bool ThrowOnApiResponseStatusNonComplete { get; set; } = true;

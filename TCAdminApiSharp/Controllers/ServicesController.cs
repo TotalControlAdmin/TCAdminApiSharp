@@ -71,7 +71,10 @@ namespace TCAdminApiSharp.Controllers
 
         public Task<ListResponse<Service>> GetServicesByUserId(int userId)
         {
-            return FindServices(new QueryableInfo(new WhereList("UserId", ColumnOperator.Equal, userId)));
+            var request = GenerateDefaultRequest();
+            request.Method = Method.GET;
+            request.Resource += $"gameservices?{nameof(userId)}={userId}";
+            return ExecuteListResponseRequest<Service>(request);
         }
     }
 }
