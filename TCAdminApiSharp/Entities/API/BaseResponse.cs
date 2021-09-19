@@ -10,7 +10,7 @@ namespace TCAdminApiSharp.Entities.API
 
         [JsonProperty("Message")] public string? Message { get; private set; }
 
-        public IRestResponse RestResponse { get; internal set; }
+        [JsonIgnore] public IRestResponse RestResponse { get; internal set; }
 
         internal BaseResponse()
         {

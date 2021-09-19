@@ -63,7 +63,13 @@ namespace TCAdminApiSharp.Querying.Operations
             var temp = "(";
             foreach (var info in this)
             {
-                temp += $"[{info.Column}] {ConvertColumnOperator(info.ColumnOperator)} '{info.ColumnValue}'";
+                var tempColumnName = info.Column;
+                if (!tempColumnName.StartsWith("[") && !tempColumnName.EndsWith("]"))
+                {
+                    tempColumnName = $"[{info.Column}]";
+                }
+                
+                temp += $"{tempColumnName} {ConvertColumnOperator(info.ColumnOperator)} '{info.ColumnValue}'";
                 if (!this.Last().Equals(info))
                     // Add where operator
                     temp += $" {WhereOperator.ToString().ToUpper()} ";
