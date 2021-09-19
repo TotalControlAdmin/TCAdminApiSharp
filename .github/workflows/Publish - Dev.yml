@@ -21,7 +21,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Get DateTime
       id: datetime
-      run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      run: echo "::set-output name=date::$(date +'%Y%m%d-%H%M%S')"
     - name: Deploy - Dev
       uses: alexr03/publish-nuget@master
       with:
@@ -30,3 +30,4 @@ jobs:
         VERSION_REGEX: ^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$
         VERSION_SUFFIX: -dev-${{steps.datetime.outputs.date}}-${{github.run_number}}
         TAG_FORMAT: dev-v*
+        INCLUDE_SYMBOLS: true

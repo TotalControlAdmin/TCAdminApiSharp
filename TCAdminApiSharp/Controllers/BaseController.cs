@@ -30,7 +30,7 @@ namespace TCAdminApiSharp.Controllers
 
         public RestRequest GenerateDefaultRequest()
         {
-            return new(BaseResource);
+            return new RestRequest(BaseResource);
         }
         
         public async Task<BaseResponse<T>> AdvancedRequest<T>(string resource, QueryableInfo query, Method method = Method.POST)
