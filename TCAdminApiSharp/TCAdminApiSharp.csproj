@@ -3,7 +3,6 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>TCAdminAPISharp</Title>
         <Authors>Alex Redding</Authors>
         <Description>A C# Wrapper for the TCAdmin REST API. </Description>
