@@ -1,23 +1,22 @@
 ﻿using System;
+using System.Net.Http;
 using Newtonsoft.Json;
-using RestSharp;
 
-namespace TCAdminApiSharp.Entities.API
+namespace TCAdminApiSharp.Entities.API;
+
+public class ErrorResponse : BaseResponse<object>
 {
-    public class ErrorResponse : BaseResponse<object>
+    internal ErrorResponse(HttpResponseMessage responseMessage)
     {
-        internal ErrorResponse(IRestResponse restResponse)
+        try
         {
-            try
-            {
-                JsonConvert.PopulateObject(restResponse.Content, this);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Couldn't parse API error to object!", e);
-            }
-
-            RestResponse = restResponse;
+            JsonConvert.PopulateObject(responseMessage.Content.ReadAsStringAsync().Result, this);
         }
+        catch (Exception e)
+        {
+            throw new Exception("Couldn't parse API error to object!", e);
+        }
+
+        ResponseMessage = responseMessage;
     }
 }

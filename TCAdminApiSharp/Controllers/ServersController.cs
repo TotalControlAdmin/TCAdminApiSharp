@@ -1,51 +1,27 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Server;
-using TCAdminApiSharp.Entities.Service;
-using TCAdminApiSharp.Exceptions;
-using TCAdminApiSharp.Exceptions.API;
 
-namespace TCAdminApiSharp.Controllers
+namespace TCAdminApiSharp.Controllers;
+
+public class ServersController : BaseController
 {
-    public class ServersController : BaseController
+    public ServersController(TcaClient tcaClient) : base(tcaClient, "api/server")
     {
-        public ServersController() : base("api/server")
-        {
-        }
+    }
 
-        // public int CreateService(ServiceBuilder builder)
-        // {
-        //     var body = builder.GenerateRequestBody();
-        //     var request = GenerateDefaultRequest();
-        //     request.Resource += "create";
-        //     request.Method = Method.POST;
-        //     request.AddParameter("createinfo", body, ParameterType.GetOrPost);
-        //     return ExecuteBaseResponseRequest<int>(request).Result;
-        // }
+    public async Task<Server> GetServer(int serverId)
+    {
+        var request = GenerateDefaultRequest(serverId.ToString());
+        var result = (await ExecuteBaseResponseRequest<Server>(request)).Result;
+        return result;
+    }
 
-        public async Task<Server> GetServer(int serverId)
-        {
-            try
-            {
-                var request = GenerateDefaultRequest();
-                request.Resource += serverId;
-                return (await ExecuteBaseResponseRequest<Server>(request)).Result;
-            }
-            catch (ApiResponseException e)
-            {
-                if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                    throw new NotFoundException(typeof(Service), e, new[] {serverId});
+    public async Task<ListResponse<Server>> GetServers()
+    {
+        var request = GenerateDefaultRequest();
+        var result = await ExecuteListResponseRequest<Server>(request);
 
-                throw;
-            }
-        }
-
-        public Task<ListResponse<Server>> GetServers()
-        {
-            var request = GenerateDefaultRequest();
-            request.Resource += "servers";
-            return ExecuteListResponseRequest<Server>(request);
-        }
+        return result;
     }
 }

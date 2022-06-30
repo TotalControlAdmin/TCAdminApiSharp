@@ -1,71 +1,60 @@
 ﻿using System;
-using Microsoft.Extensions.DependencyInjection;
-using RestSharp;
+using System.Net.Http;
 using Serilog;
 using Serilog.Events;
 using TCAdminApiSharp.Controllers;
+using TCAdminApiSharp.Helpers;
 
-// ReSharper disable NotAccessedField.Global
+namespace TCAdminApiSharp;
 
-namespace TCAdminApiSharp
+public class TcaClient : IDisposable
 {
-    public class TcaClient
+    public readonly string Host;
+    private readonly string _apiKey;
+    public readonly ServicesController ServicesController;
+    public readonly ServersController ServersController;
+    public readonly UsersController UsersController;
+    public readonly TasksController TasksController;
+    public readonly TcaClientSettings Settings;
+    internal readonly HttpClient HttpClient;
+
+    public TcaClient(string host, string apiKey, TcaClientSettings? clientSettings = null)
     {
-        public readonly string Host;
-        private readonly string _apiKey;
-        internal static ServiceProvider ServiceProvider = new ServiceCollection().BuildServiceProvider();
-        internal readonly RestClient RestClient;
-        public readonly ServicesController ServicesController;
-        public readonly ServersController ServersController;
-        public readonly UsersController UsersController;
-        public readonly TasksController TasksController;
-        public readonly TcaClientSettings Settings;
+        clientSettings ??= TcaClientSettings.Default;
+        SetupDefaultLogger(clientSettings.MinimumLogLevel);
+        if (string.IsNullOrEmpty(host)) throw new ArgumentException("Parameter is null/empty", nameof(host));
+        if (string.IsNullOrEmpty(apiKey)) throw new ArgumentException("Parameter is null/empty", nameof(apiKey));
 
-        public TcaClient(string host, string apiKey, TcaClientSettings? clientSettings = null)
-        {
-            clientSettings ??= TcaClientSettings.Default;
-            SetupDefaultLogger(clientSettings.MinimumLogLevel);
-            InitializeDI();
-            if (string.IsNullOrEmpty(host)) throw new ArgumentException("Parameter is null/empty", nameof(host));
-            if (string.IsNullOrEmpty(apiKey)) throw new ArgumentException("Parameter is null/empty", nameof(apiKey));
+        Settings = clientSettings;
+        Host = host;
+        _apiKey = apiKey;
 
-            Settings = clientSettings;
-            Host = host;
-            _apiKey = apiKey;
+        HttpClient = new HttpClient();
+        HttpClient.BaseAddress = new Uri(Host);
+        HttpClient.DefaultRequestHeaders.Add("api_key", _apiKey);
+        HttpClient.DefaultRequestHeaders.Add("accept", Constants.JsonContentType);
 
-            RestClient = new RestClient(Host);
-            RestClient.AddDefaultHeader("api_key", apiKey);
+        ServicesController = new ServicesController(this);
+        ServersController = new ServersController(this);
+        UsersController = new UsersController(this);
+        TasksController = new TasksController(this);
+    }
 
-            ServicesController = ServiceProvider.GetService<ServicesController>() ??
-                                 throw new InvalidOperationException();
-            ServersController =
-                ServiceProvider.GetService<ServersController>() ?? throw new InvalidOperationException();
-            UsersController = ServiceProvider.GetService<UsersController>() ?? throw new InvalidOperationException();
-            TasksController = ServiceProvider.GetService<TasksController>() ?? throw new InvalidOperationException();
-        }
+    internal int GetTokenUserId()
+    {
+        return int.Parse(_apiKey.Split('#')[0]);
+    }
 
-        internal int GetTokenUserId()
-        {
-            return int.Parse(_apiKey.Split('#')[0]);
-        }
+    private static void SetupDefaultLogger(LogEventLevel logEventLevel)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Is(logEventLevel)
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+    }
 
-        private void InitializeDI()
-        {
-            ServiceProvider = new ServiceCollection()
-                .AddTransient(_ => this)
-                .AddScoped<ServicesController>()
-                .AddScoped<ServersController>()
-                .AddScoped<UsersController>()
-                .AddScoped<TasksController>()
-                .BuildServiceProvider();
-        }
-
-        private static void SetupDefaultLogger(LogEventLevel logEventLevel)
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Is(logEventLevel)
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-                .CreateLogger();
-        }
+    public void Dispose()
+    {
+        HttpClient.Dispose();
     }
 }

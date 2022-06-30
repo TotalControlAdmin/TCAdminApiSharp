@@ -1,15 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using RestSharp;
+﻿using System.Net.Http;
 
-namespace TCAdminApiSharp.Querying
+namespace TCAdminApiSharp.Querying;
+
+public interface IQueryOperation
 {
-    public interface IQueryOperation
-    {
-        string JsonKey { get; set; }
-        
-        void ModifyRequest(IRestRequest request)
-        {
-
-        }
-    }
+    string JsonKey { get; set; }
+    void ModifyRequest(HttpRequestMessage request);
 }

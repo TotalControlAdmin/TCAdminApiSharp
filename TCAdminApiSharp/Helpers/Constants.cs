@@ -1,20 +1,20 @@
 ﻿using Newtonsoft.Json;
 
-namespace TCAdminApiSharp.Helpers
+namespace TCAdminApiSharp.Helpers;
+
+internal static class Constants
 {
-    internal static class Constants
+    public const string JsonContentType = "application/json";
+
+    public static readonly JsonSerializerSettings IgnoreDefaultValues = new()
     {
-        public const string JsonContentType = "application/json";
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore,
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+    };
 
-        public static readonly JsonSerializerSettings IgnoreDefaultValues = new()
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            DefaultValueHandling = DefaultValueHandling.Ignore
-        };
-
-        public static readonly JsonSerializerSettings IgnoreReferenceLoop = new()
-        {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        };
-    }
+    public static readonly JsonSerializerSettings IgnoreReferenceLoop = new()
+    {
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+    };
 }

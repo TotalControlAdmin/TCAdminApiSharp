@@ -1,8 +1,7 @@
-﻿namespace TCAdminApiSharp.Entities.Billing
+﻿namespace TCAdminApiSharp.Entities.Billing;
+
+public enum BillingStatus
 {
-    public enum BillingStatus
-    {
-        Active = 1,
-        Suspended = 2
-    }
+    Active = 1,
+    Suspended = 2
 }

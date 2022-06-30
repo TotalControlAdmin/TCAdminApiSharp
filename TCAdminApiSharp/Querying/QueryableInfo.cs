@@ -1,40 +1,38 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RestSharp;
 
-namespace TCAdminApiSharp.Querying
+namespace TCAdminApiSharp.Querying;
+
+public class QueryableInfo
 {
-    public class QueryableInfo
+    [JsonProperty("RowCount")] public int RowCount { get; set; }
+
+    [JsonProperty("Offset")] public int Offset { get; set; }
+
+    [JsonIgnore] public List<IQueryOperation> QueryOperations { get; set; } = new();
+
+    public QueryableInfo()
     {
-        [JsonProperty("RowCount")] public int RowCount { get; set; }
+    }
 
-        [JsonProperty("Offset")] public int Offset { get; set; }
+    public QueryableInfo(int rowCount, int offset, IQueryOperation queryOperation)
+    {
+        RowCount = rowCount;
+        Offset = offset;
+        QueryOperations.Add(queryOperation);
+    }
 
-        [JsonIgnore] public List<IQueryOperation> QueryOperations { get; set; } = new();
+    public QueryableInfo(params IQueryOperation[] queryOperations)
+    {
+        foreach (var queryOperation in queryOperations) QueryOperations.Add(queryOperation);
+    }
 
-        public QueryableInfo()
+    public void BuildQuery(HttpRequestMessage request)
+    {
+        foreach (var queryOperation in QueryOperations)
         {
-        }
-
-        public QueryableInfo(int rowCount, int offset, IQueryOperation queryOperation)
-        {
-            RowCount = rowCount;
-            Offset = offset;
-            QueryOperations.Add(queryOperation);
-        }
-
-        public QueryableInfo(params IQueryOperation[] queryOperations)
-        {
-            foreach (var queryOperation in queryOperations) QueryOperations.Add(queryOperation);
-        }
-
-        public void BuildQuery(IRestRequest request)
-        {
-            foreach (var queryOperation in QueryOperations)
-            {
-                queryOperation.ModifyRequest(request);
-            }
+            queryOperation.ModifyRequest(request);
         }
     }
 }

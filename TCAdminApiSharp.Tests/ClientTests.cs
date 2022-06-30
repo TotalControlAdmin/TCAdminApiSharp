@@ -1,26 +1,25 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace TCAdminApiSharp.Tests
+namespace TCAdminApiSharp.Tests;
+
+public class ClientTests
 {
-    public class ClientTests
+    [Test]
+    public void CreateClientWithoutHost()
     {
-        [Test]
-        public void CreateClientWithoutHost()
+        Assert.Catch<ArgumentException>(() =>
         {
-            Assert.Catch<ArgumentException>(() =>
-            {
-                var _ = new TcaClient("", "-");
-            });
-        }
+            var _ = new TcaClient("", "-");
+        });
+    }
     
-        [Test]
-        public void CreateClientWithoutToken()
+    [Test]
+    public void CreateClientWithoutToken()
+    {
+        Assert.Catch<ArgumentException>(() =>
         {
-            Assert.Catch<ArgumentException>(() =>
-            {
-                var _ = new TcaClient("https://4a815e4e-aaa8-4351-a948-5ca3f92e5c8b.mock.pstmn.io", "");
-            });
-        }
+            var _ = new TcaClient("https://4a815e4e-aaa8-4351-a948-5ca3f92e5c8b.mock.pstmn.io", "");
+        });
     }
 }

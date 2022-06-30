@@ -1,8 +1,7 @@
-﻿namespace TCAdminApiSharp.Querying.Operators
+﻿namespace TCAdminApiSharp.Querying.Operators;
+
+public enum WhereOperator
 {
-    public enum WhereOperator
-    {
-        And,
-        Or
-    }
+    And,
+    Or
 }

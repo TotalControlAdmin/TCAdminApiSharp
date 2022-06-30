@@ -2,7 +2,7 @@ name: Dev - Build + Deploy
 
 on:
   push:
-    branches: [ dev-*, dev/** ]
+    branches: [ dev-*, dev/**, develop, develop/* ]
 
 jobs:
   build:
@@ -12,22 +12,16 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.100
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - name: Get DateTime
-      id: datetime
-      run: echo "::set-output name=date::$(date +'%Y%m%d-%H%M%S')"
-    - name: Deploy - Dev
-      uses: alexr03/publish-nuget@master
+        dotnet-version: 6.0.x
+
+    - name: Build Nuget Packages
+      run: "mkdir build && dotnet pack -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg --include-source -o build -p:VersionSuffix='nightly' -p:BuildNumber=0$((${{ github.run_number }} ))"
+
+    - name: Publish Nuget Packages
+      run: "dotnet nuget push \"build/*\" -k ${{ secrets.ALEX_NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json"
+
+    - name: "Upload Nuget Packages To Github Actions"
+      uses: actions/upload-artifact@v3
       with:
-        PROJECT_FILE_PATH: TCAdminApiSharp/TCAdminApiSharp.csproj
-        NUGET_KEY: ${{secrets.ALEX_NUGET_API_KEY}}
-        VERSION_REGEX: ^\s*<AssemblyVersion>(.*)<\/AssemblyVersion>\s*$
-        VERSION_SUFFIX: -dev-${{steps.datetime.outputs.date}}-${{github.run_number}}
-        TAG_FORMAT: dev-v*
-        INCLUDE_SYMBOLS: true
+        name: PR Nuget Packages
+        path: build/*

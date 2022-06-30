@@ -2,14 +2,13 @@
 using Newtonsoft.Json.Converters;
 using TCAdminApiSharp.Querying.Operators;
 
-namespace TCAdminApiSharp.Querying.Structs
-{
-    public struct WhereInfo
-    {
-        public string Column;
-        public object ColumnValue;
+namespace TCAdminApiSharp.Querying.Structs;
 
-        [JsonConverter(typeof(StringEnumConverter))]
-        public ColumnOperator ColumnOperator;
-    }
+public struct WhereInfo
+{
+    public string Column;
+    public object ColumnValue;
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public ColumnOperator ColumnOperator;
 }

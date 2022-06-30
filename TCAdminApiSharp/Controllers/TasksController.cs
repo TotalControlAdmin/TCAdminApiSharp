@@ -1,52 +1,34 @@
-﻿using System.Net;
+﻿using System;
 using System.Threading.Tasks;
-using RestSharp;
+using Microsoft.AspNetCore.WebUtilities;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Task;
-using TCAdminApiSharp.Entities.User;
-using TCAdminApiSharp.Exceptions;
-using TCAdminApiSharp.Exceptions.API;
 using Task = TCAdminApiSharp.Entities.Task.Task;
 
-namespace TCAdminApiSharp.Controllers
+namespace TCAdminApiSharp.Controllers;
+
+public class TasksController : BaseController
 {
-    public class TasksController : BaseController
+    public TasksController(TcaClient tcaClient) : base(tcaClient, "api/task")
     {
-        public TasksController() : base("api/task")
-        {
-        }
+    }
 
-        public async Task<Task> GetTask(int taskId)
-        {
-            try
-            {
-                var request = GenerateDefaultRequest();
-                request.Resource += taskId;
-                return (await ExecuteBaseResponseRequest<Task>(request)).Result;
-            }
-            catch (ApiResponseException e)
-            {
-                if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                    throw new NotFoundException(typeof(Task), e, new[] {taskId});
+    public async Task<Task> GetTask(int taskId)
+    {
+        var request = GenerateDefaultRequest(taskId.ToString());
+        return (await ExecuteBaseResponseRequest<Task>(request)).Result;
+    }
 
-                throw;
-            }
-        }
+    public Task<ListResponse<Task>> GetPendingTasks(int serverId)
+    {
+        var request = GenerateDefaultRequest(QueryHelpers.AddQueryString("getpendingtasks", nameof(serverId), serverId.ToString()));
+        return ExecuteListResponseRequest<Task>(request);
+    }
 
-        public Task<ListResponse<Task>> GetPendingTasks(int serverId)
-        {
-            var request = GenerateDefaultRequest();
-            request.Resource += "getpendingtasks";
-            request.AddParameter("serverId", serverId, ParameterType.QueryString);
-            return ExecuteListResponseRequest<Task>(request);
-        }
-
-        public Task<ListResponse<TaskStep>> GetTaskSteps(int taskId)
-        {
-            var request = GenerateDefaultRequest();
-            request.Resource = "api/taskstep/getsteps";
-            request.AddParameter("taskId", taskId, ParameterType.QueryString);
-            return ExecuteListResponseRequest<TaskStep>(request);
-        }
+    public Task<ListResponse<TaskStep>> GetTaskSteps(int taskId)
+    {
+        var request = GenerateDefaultRequest();
+        request.RequestUri = new Uri(QueryHelpers.AddQueryString("api/taskstep/getsteps", nameof(taskId), taskId.ToString()), UriKind.RelativeOrAbsolute);
+        return ExecuteListResponseRequest<TaskStep>(request);
     }
 }

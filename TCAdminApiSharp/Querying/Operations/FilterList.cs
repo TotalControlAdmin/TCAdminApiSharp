@@ -1,62 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RestSharp;
 using TCAdminApiSharp.Querying.Structs;
 
-namespace TCAdminApiSharp.Querying.Operations
+namespace TCAdminApiSharp.Querying.Operations;
+
+public class FilterList : List<FilterInfo>, IQueryOperation
 {
-    public class FilterList : List<FilterInfo>, IQueryOperation
+    [JsonIgnore]
+    public string JsonKey { get; set; } = "Fields";
+
+    public FilterList()
     {
-        [JsonIgnore]
-        public string JsonKey { get; set; } = "Fields";
-
-        public FilterList()
-        {
-        }
+    }
         
-        public FilterList(params string[] where)
+    public FilterList(params string[] where)
+    {
+        foreach (var filterInfo in where)
         {
-            foreach (var filterInfo in where)
-            {
-                Add(filterInfo);
-            }
+            Add(filterInfo);
         }
+    }
 
-        public FilterList(FilterInfo where)
-        {
-            Add(where);
-        }
+    public FilterList(FilterInfo where)
+    {
+        Add(where);
+    }
         
-        public FilterList(params FilterInfo[] where)
+    public FilterList(params FilterInfo[] where)
+    {
+        foreach (var filterInfo in @where)
         {
-            foreach (var filterInfo in @where)
-            {
-                Add(filterInfo);
-            }
+            Add(filterInfo);
         }
+    }
 
-        public void Add(string column)
+    public void Add(string column)
+    {
+        Add(new FilterInfo
         {
-            Add(new FilterInfo()
-            {
-                Column = column
-            });
-        }
+            Column = column
+        });
+    }
 
-        public JToken GenerateQuery()
-        {
-            var temp = this.Aggregate("(", (current, info) => current + $"[{info.Column}]");
+    public JToken GenerateQuery()
+    {
+        var temp = this.Aggregate("(", (current, info) => current + $"[{info.Column}]") + ")";
+        return new JValue(temp);
+    }
 
-            temp += ")";
-            return new JValue(temp);
-        }
-
-        public void ModifyRequest(IRestRequest request)
-        {
-            request.AddQueryParameter("fields", string.Join(",", this.Select(x => x.Column.ToLower())));
-        }
+    public void ModifyRequest(HttpRequestMessage request)
+    {
+        request.RequestUri = new Uri(QueryHelpers.AddQueryString(request.RequestUri.ToString(), JsonKey, GenerateQuery().ToString()));
     }
 }

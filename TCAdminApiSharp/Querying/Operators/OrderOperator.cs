@@ -1,8 +1,7 @@
-﻿namespace TCAdminApiSharp.Querying.Operators
+﻿namespace TCAdminApiSharp.Querying.Operators;
+
+public enum OrderOperator
 {
-    public enum OrderOperator
-    {
-        Ascending,
-        Descending
-    }
+    Ascending,
+    Descending
 }

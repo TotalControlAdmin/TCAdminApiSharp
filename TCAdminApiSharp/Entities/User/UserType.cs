@@ -1,9 +1,8 @@
-﻿namespace TCAdminApiSharp.Entities.User
+﻿namespace TCAdminApiSharp.Entities.User;
+
+public enum UserType
 {
-    public enum UserType
-    {
-        User = 1,
-        SubAdmin = 2,
-        Admin = 3
-    }
+    User = 1,
+    SubAdmin = 2,
+    Admin = 3
 }

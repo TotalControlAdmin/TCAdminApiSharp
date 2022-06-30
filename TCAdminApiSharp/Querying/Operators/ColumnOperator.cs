@@ -1,14 +1,13 @@
-﻿namespace TCAdminApiSharp.Querying.Operators
+﻿namespace TCAdminApiSharp.Querying.Operators;
+
+public enum ColumnOperator
 {
-    public enum ColumnOperator
-    {
-        Equal,
-        NotEqual,
-        GreaterThan,
-        GreaterOrEqualTo,
-        LowerThan,
-        LowerOrEqualTo,
-        Like,
-        NotLike
-    }
+    Equal,
+    NotEqual,
+    GreaterThan,
+    GreaterOrEqualTo,
+    LowerThan,
+    LowerOrEqualTo,
+    Like,
+    NotLike
 }

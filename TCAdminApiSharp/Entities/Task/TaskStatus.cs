@@ -1,12 +1,11 @@
-﻿namespace TCAdminApiSharp.Entities.Task
+﻿namespace TCAdminApiSharp.Entities.Task;
+
+public enum TaskStatus
 {
-    public enum TaskStatus
-    {
-        NotExecuted,
-        Executing,
-        Scheduled,
-        Completed,
-        Canceled,
-        TaskError
-    }
+    NotExecuted,
+    Executing,
+    Scheduled,
+    Completed,
+    Canceled,
+    TaskError
 }

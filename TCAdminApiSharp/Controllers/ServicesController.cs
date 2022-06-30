@@ -1,80 +1,63 @@
-﻿using System;
-using System.Net;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using RestSharp;
+using Microsoft.AspNetCore.WebUtilities;
 using TCAdminApiSharp.Entities.API;
 using TCAdminApiSharp.Entities.Service;
-using TCAdminApiSharp.Entities.User;
-using TCAdminApiSharp.Exceptions;
-using TCAdminApiSharp.Exceptions.API;
 using TCAdminApiSharp.Querying;
 using TCAdminApiSharp.Querying.Operations;
 using TCAdminApiSharp.Querying.Operators;
 
-namespace TCAdminApiSharp.Controllers
+namespace TCAdminApiSharp.Controllers;
+
+public class ServicesController : BaseController
 {
-    public class ServicesController : BaseController
+    public ServicesController(TcaClient tcaClient) : base(tcaClient, "api/service")
     {
-        public ServicesController() : base("api/service")
-        {
-        }
+    }
 
-        public async Task<int> CreateService(ServiceBuilder builder)
-        {
-            var body = builder.GenerateRequestBody();
-            var request = GenerateDefaultRequest();
-            request.Resource += "create";
-            request.Method = Method.POST;
-            request.AddParameter("createinfo", body, ParameterType.GetOrPost);
-            var response = await ExecuteBaseResponseRequest<int>(request);
-            return response.Result;
-        }
+    public async Task<int> CreateService(ServiceBuilder builder)
+    {
+        var body = builder.GenerateRequestBody();
+        var request = GenerateDefaultRequest("create");
+        request.Method = HttpMethod.Post;
+        request.Content = new FormUrlEncodedContent(new []{new KeyValuePair<string, string>("createinfo", body)});
+        var response = await ExecuteBaseResponseRequest<int>(request);
+        return response.Result;
+    }
 
-        public async Task<ListResponse<Service>> FindServices(QueryableInfo query)
-        {
-            var request = GenerateDefaultRequest();
-            request.Method = Method.POST;
-            request.Resource += "gameservices";
-            query.BuildQuery(request);
-            return await ExecuteListResponseRequest<Service>(request);
-        }
+    public async Task<ListResponse<Service>> FindServices(QueryableInfo query)
+    {
+        var request = GenerateDefaultRequest("gameservices");
+        request.Method = HttpMethod.Post;;
+        query.BuildQuery(request);
+        var result = await ExecuteListResponseRequest<Service>(request);
+        return result;
+    }
 
-        public async Task<Service> GetService(int serviceId)
-        {
-            try
-            {
-                var request = GenerateDefaultRequest();
-                request.Resource += serviceId;
-                return (await ExecuteBaseResponseRequest<Service>(request)).Result;
-            }
-            catch (ApiResponseException e)
-            {
-                if (e.ErrorResponse.RestResponse.StatusCode == HttpStatusCode.NotFound)
-                    throw new NotFoundException(typeof(Service), e, new[] {serviceId});
+    public async Task<Service> GetService(int serviceId)
+    {
+        var request = GenerateDefaultRequest(serviceId.ToString());
+        var result = (await ExecuteBaseResponseRequest<Service>(request)).Result;
+        return result;
+    }
 
-                throw;
-            }
-        }
+    public async Task<ListResponse<Service>> GetServices()
+    {
+        var request = GenerateDefaultRequest("gameservices");
+        var result = await ExecuteListResponseRequest<Service>(request);
+        return result;
+    }
 
-        public async Task<ListResponse<Service>> GetServices()
-        {
-            var request = GenerateDefaultRequest();
-            request.Resource += "gameservices";
-            return await ExecuteListResponseRequest<Service>(request);
-        }
+    public Task<ListResponse<Service>> GetServicesByBillingId(string billingId)
+    {
+        return FindServices(new QueryableInfo(new WhereList("BillingId", ColumnOperator.Equal, billingId)));
+    }
 
-        public Task<ListResponse<Service>> GetServicesByBillingId(string billingId)
-        {
-            return FindServices(new QueryableInfo(new WhereList("BillingId", ColumnOperator.Equal, billingId)));
-        }
-
-        public Task<ListResponse<Service>> GetServicesByUserId(int userId)
-        {
-            var request = GenerateDefaultRequest();
-            request.Method = Method.GET;
-            request.Resource += $"gameservices?{nameof(userId)}={userId}";
-            return ExecuteListResponseRequest<Service>(request);
-        }
+    public async Task<ListResponse<Service>> GetServicesByUserId(int userId)
+    {
+        var request = GenerateDefaultRequest(QueryHelpers.AddQueryString("gameservices", nameof(userId), userId.ToString()));
+        var result = await ExecuteListResponseRequest<Service>(request);
+        return result;
     }
 }

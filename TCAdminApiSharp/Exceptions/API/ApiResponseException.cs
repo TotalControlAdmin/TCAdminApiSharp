@@ -1,29 +1,36 @@
 ﻿using System;
-using RestSharp;
-using TCAdminApiSharp.Entities;
+using System.Net.Http;
+using Newtonsoft.Json;
 using TCAdminApiSharp.Entities.API;
 
-namespace TCAdminApiSharp.Exceptions.API
+namespace TCAdminApiSharp.Exceptions.API;
+
+public class ApiResponseException : Exception
 {
-    public class ApiResponseException : Exception
+    public readonly HttpResponseMessage HttpResponseMessage;
+    public readonly BaseResponse<Exception> ExceptionResponse;
+
+    internal ApiResponseException()
     {
-        public readonly IRestResponse RestResponse;
-        public readonly ErrorResponse ErrorResponse;
+    }
 
-        internal ApiResponseException()
-        {
-        }
+    internal ApiResponseException(HttpResponseMessage httpResponseMessage) : this()
+    {
+        this.HttpResponseMessage = httpResponseMessage;
+        var readAsStringAsync = HttpResponseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        ExceptionResponse = JsonConvert.DeserializeObject<BaseResponse<Exception>>(readAsStringAsync);
+    }
 
-        internal ApiResponseException(IRestResponse restResponse) : this()
-        {
-            RestResponse = restResponse;
-            ErrorResponse = new ErrorResponse(restResponse);
-        }
-
-        internal ApiResponseException(IRestResponse restResponse, string message) : base(message)
-        {
-            RestResponse = restResponse;
-            ErrorResponse = new ErrorResponse(restResponse);
-        }
+    internal ApiResponseException(HttpResponseMessage httpResponseMessage, string message) : base(message)
+    {
+        this.HttpResponseMessage = httpResponseMessage;
+        var readAsStringAsync = HttpResponseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        ExceptionResponse = JsonConvert.DeserializeObject<BaseResponse<Exception>>(readAsStringAsync);
+    }
+    
+    internal ApiResponseException(HttpResponseMessage httpResponseMessage, BaseResponse<Exception> exceptionResponse) : base(exceptionResponse.Message)
+    {
+        this.HttpResponseMessage = httpResponseMessage;
+        ExceptionResponse = exceptionResponse;
     }
 }

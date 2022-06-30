@@ -1,12 +1,11 @@
-﻿namespace TCAdminApiSharp.Querying.Structs
-{
-    public struct FilterInfo
-    {
-        public string Column;
+﻿namespace TCAdminApiSharp.Querying.Structs;
 
-        public FilterInfo(string column)
-        {
-            Column = column;
-        }
+public struct FilterInfo
+{
+    public string Column;
+
+    public FilterInfo(string column)
+    {
+        Column = column;
     }
 }

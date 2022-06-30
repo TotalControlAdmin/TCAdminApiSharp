@@ -1,119 +1,155 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using RestSharp;
 using Serilog;
 using TCAdminApiSharp.Entities.API;
+using TCAdminApiSharp.Entities.Generic;
 using TCAdminApiSharp.Exceptions.API;
+using TCAdminApiSharp.Helpers;
 using TCAdminApiSharp.Querying;
 
-namespace TCAdminApiSharp.Controllers
+namespace TCAdminApiSharp.Controllers;
+
+public class BaseController
 {
-    public class BaseController
+    public readonly TcaClient TcaClient;
+    public readonly string BaseResource;
+    internal readonly ILogger Logger;
+
+    protected BaseController(TcaClient tcaClient, string baseResource)
     {
-        public readonly TcaClient TcaClient =
-            TcaClient.ServiceProvider.GetService<TcaClient>() ?? throw new InvalidOperationException();
+        Logger = Log.ForContext(GetType());
+        TcaClient = tcaClient;
+        BaseResource = baseResource;
 
-        public readonly string BaseResource;
-        internal readonly ILogger Logger;
-
-        protected BaseController(string baseResource)
-        {
-            Logger = Log.ForContext(GetType());
-            BaseResource = baseResource;
-
-            if (!baseResource.EndsWith("/")) BaseResource = baseResource + "/";
-        }
-
-        public RestRequest GenerateDefaultRequest()
-        {
-            return new RestRequest(BaseResource);
-        }
+        if (!baseResource.EndsWith("/")) BaseResource = baseResource + "/";
+    }
         
-        public async Task<BaseResponse<T>> AdvancedRequest<T>(string resource, QueryableInfo query, Method method = Method.POST)
-        {
-            var request = GenerateDefaultRequest();
-            request.Method = method;
-            request.Resource += resource;
-            query.BuildQuery(request);
-            return await ExecuteBaseResponseRequest<T>(request);
-        }
+    public HttpRequestMessage GenerateDefaultRequest()
+    {
+        var httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.RequestUri = Append(new Uri(BaseResource, UriKind.RelativeOrAbsolute));
+        return httpRequestMessage;
+    }
+
+    public HttpRequestMessage GenerateDefaultRequest(params string[] paths)
+    {
+        var httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.RequestUri = Append(new Uri(BaseResource, UriKind.RelativeOrAbsolute), paths);
+        return httpRequestMessage;
+    }
+    
+    public HttpRequestMessage GenerateDefaultRequest(HttpMethod httpMethod, params string[] paths)
+    {
+        var httpRequestMessage = new HttpRequestMessage();
+        httpRequestMessage.RequestUri = Append(new Uri(BaseResource, UriKind.RelativeOrAbsolute), paths);
+        httpRequestMessage.Method = httpMethod;
+        return httpRequestMessage;
+    }
         
-        public async Task<ListResponse<T>> AdvancedListRequest<T>(string resource, QueryableInfo query, Method method = Method.POST)
-        {
-            var request = GenerateDefaultRequest();
-            request.Method = method;
-            request.Resource += resource;
-            query.BuildQuery(request);
-            return await ExecuteListResponseRequest<T>(request);
-        }
+    public async Task<BaseResponse<T>> AdvancedRequest<T>(string resource, QueryableInfo query, HttpMethod method)
+    {
+        var request = GenerateDefaultRequest(resource);
+        request.Method = method;
+        query.BuildQuery(request);
+        return await ExecuteBaseResponseRequest<T>(request);
+    }
+        
+    public async Task<ListResponse<T>> AdvancedListRequest<T>(string resource, QueryableInfo query, HttpMethod method)
+    {
+        var request = GenerateDefaultRequest(resource);
+        request.Method = method;
+        query.BuildQuery(request);
+        return await ExecuteListResponseRequest<T>(request);
+    }
 
-        public async Task<BaseResponse> ExecuteBaseResponseRequest(RestRequest request)
-        {
-            var (baseResponse, restResponse) = await ExecuteRequestAsync<BaseResponse>(request);
-            baseResponse.RestResponse = restResponse;
-            return baseResponse;
-        }
+    public async Task<BaseResponse> ExecuteBaseResponseRequest(HttpRequestMessage requestMessage)
+    {
+        var (baseResponse, httpResponse) = await ExecuteRequestAsync<BaseResponse>(requestMessage);
+        baseResponse.RequestMessage = requestMessage;
+        baseResponse.ResponseMessage = httpResponse;
+        return baseResponse;
+    }
 
-        public async Task<BaseResponse<T>> ExecuteBaseResponseRequest<T>(RestRequest request)
-        {
-            var (item1, item2) = await ExecuteRequestAsync<BaseResponse<T>>(request);
-            item1.RestResponse = item2;
-            return item1;
-        }
+    public async Task<BaseResponse<T>> ExecuteBaseResponseRequest<T>(HttpRequestMessage requestMessage)
+    {
+        var (baseResponse, httpResponse) = await ExecuteRequestAsync<BaseResponse<T>>(requestMessage);
+        baseResponse.RequestMessage = requestMessage;
+        baseResponse.ResponseMessage = httpResponse;
+        return baseResponse;
+    }
 
-        public async Task<ListResponse<T>> ExecuteListResponseRequest<T>(RestRequest request)
-        {
-            var (baseResponse, restResponse) = await ExecuteRequestAsync<ListResponse<T>>(request);
-            baseResponse.RestResponse = restResponse;
-            return baseResponse;
-        }
+    public async Task<ListResponse<T>> ExecuteListResponseRequest<T>(HttpRequestMessage requestMessage)
+    {
+        var (baseResponse, restResponse) = await ExecuteRequestAsync<ListResponse<T>>(requestMessage);
+        return baseResponse;
+    }
 
-        public async Task<Tuple<T, IRestResponse>> ExecuteRequestAsync<T>(RestRequest request)
+    public async Task<Tuple<T, HttpResponseMessage>> ExecuteRequestAsync<T>(HttpRequestMessage request)
+    {
+        Logger.Debug("Request: {Request}", request.ToString());
+        var httpResponseMessage = await TcaClient.HttpClient.SendAsync(request);
+        Logger.Debug("Response: {Response}", httpResponseMessage.ToString());
+        var strResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+        if (!httpResponseMessage.IsSuccessStatusCode)
         {
-            Logger.Debug($"Request URL [{request.Method}]: {TcaClient.RestClient.BuildUri(request)}");
-            var restResponse = await TcaClient.RestClient.ExecuteAsync(request);
-            Logger.Debug("Response Status: " + restResponse.ResponseStatus);
-            Logger.Debug("Status Code: " + restResponse.StatusCode);
-            Logger.Debug("Parameters:");
-            foreach (var requestParameter in request.Parameters)
+            if (!TcaClient.Settings.ThrowOnApiResponseStatusNonComplete)
+                return new Tuple<T, HttpResponseMessage>(default!, httpResponseMessage);
+
+            if (!string.IsNullOrEmpty(strResponse))
             {
-                Logger.Debug(requestParameter.ToString());
+                var exceptionResponse = JsonConvert.DeserializeObject<BaseResponse<Exception>>(strResponse);
+                throw new ApiResponseException(httpResponseMessage, exceptionResponse);
             }
-            if (restResponse.ResponseStatus != ResponseStatus.Completed)
-            {
-                if (!TcaClient.Settings.ThrowOnApiResponseStatusNonComplete)
-                    return new Tuple<T, IRestResponse>(default!, restResponse);
-                throw new ApiResponseException(restResponse, "Response Status is: " + restResponse.ResponseStatus);
-            }
-
-            if (restResponse.StatusCode != HttpStatusCode.OK)
-            {
-                if (!TcaClient.Settings.ThrowOnApiStatusCodeNonOk)
-                    return new Tuple<T, IRestResponse>(default!, restResponse);
-                throw new ApiResponseException(restResponse, $"Status code is: {restResponse.StatusCode}\n{restResponse.Content}");
-            }
-
-            var baseResponse =
-                JsonConvert.DeserializeObject<BaseResponse<object>>(restResponse
-                    .Content); // First deserialize to the base response
-            baseResponse.RestResponse = restResponse;
-            if (!baseResponse.Success)
-            {
-                var tType = typeof(T);
-                if (tType.GenericTypeArguments.Contains(baseResponse.Result.GetType()))
-                    return new Tuple<T, IRestResponse>(JsonConvert.DeserializeObject<T>(restResponse.Content),
-                        restResponse);
-
-                if (!TcaClient.Settings.ThrowOnApiSuccessFailure)
-                    return new Tuple<T, IRestResponse>(default!, restResponse);
-                throw new ApiResponseException(restResponse, "API returned an error");
-            }
-
-            return new Tuple<T, IRestResponse>(JsonConvert.DeserializeObject<T>(restResponse.Content), restResponse);
+            
+            throw new ApiResponseException(httpResponseMessage, "Response Status Code is: " + httpResponseMessage.StatusCode);
         }
+
+        var response =
+            JsonConvert.DeserializeObject<T>(strResponse, Constants.IgnoreDefaultValues);
+        if (response != null) ApplyObjectBaseTCAClient(response, true);
+
+        return new Tuple<T, HttpResponseMessage>(response, httpResponseMessage);;
+    }
+
+    public void ApplyObjectBaseTCAClient(object obj, bool recursive)
+    {
+        var type = obj.GetType();
+        // if (type.IsSubclassOf(typeof(ITCAdminClientCompatible)))
+        if (typeof(ITCAdminClientCompatible).IsAssignableFrom(type))
+        {
+            type.GetProperty(nameof(ITCAdminClientCompatible.TcaClient))?.SetValue(obj, TcaClient);
+        }
+
+        if (recursive)
+        {
+            if (type.IsSubclassOf(typeof(BaseResponse)))
+            {
+                var value = type.GetProperty("Result")?.GetValue(obj);
+                if (value != null)
+                {
+                    ApplyObjectBaseTCAClient(value, recursive);
+                }
+            }
+
+            if (typeof(IEnumerable).IsAssignableFrom(type))
+            {
+                var enumerable = (IEnumerable<object>)obj;
+                foreach (var o in enumerable)
+                {
+                    ApplyObjectBaseTCAClient(o, recursive);
+                }
+            }
+        }
+    }
+        
+    public static Uri Append(Uri uri, params string[] paths)
+    {
+        return new Uri(paths.Aggregate(uri.ToString(), (current, path) =>
+            $"{current.TrimEnd('/')}/{path.TrimStart('/')}"), UriKind.RelativeOrAbsolute);
     }
 }
