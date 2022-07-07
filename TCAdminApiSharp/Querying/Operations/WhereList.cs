@@ -91,8 +91,9 @@ public class WhereList : List<WhereInfo>, IQueryOperation
         }
 
         jObject[JsonKey] = GenerateQuery();
+        var addQueryString = QueryHelpers.AddQueryString(request.RequestUri.ToString(), "queryInfo", jObject.ToString());
         request.RequestUri =
-            new Uri(QueryHelpers.AddQueryString(request.RequestUri.ToString(), "queryInfo", jObject.ToString()));
+            new Uri(addQueryString, UriKind.RelativeOrAbsolute);
     }
 
     public static string ConvertColumnOperator(ColumnOperator columnOperator)

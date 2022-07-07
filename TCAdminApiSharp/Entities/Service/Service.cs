@@ -90,7 +90,7 @@ public class Service : ObjectBase, IObjectBaseCrud<Service>, IPowerable
 
     [JsonProperty("CurrentName")] public string CurrentName { get; set; }
 
-    [JsonProperty("ServiceStatus")] public ServiceStatus ServiceStatus { get; set; }
+    [JsonProperty("ServiceStatus")] public EServiceStatus EServiceStatus { get; set; }
 
     [JsonProperty("StartTime")] public DateTime StartTime { get; set; }
 
@@ -228,7 +228,7 @@ public class Service : ObjectBase, IObjectBaseCrud<Service>, IPowerable
 
     [JsonProperty("GameKey")] public string GameKey { get; set; }
 
-    [JsonProperty("Variables")] public TcaXmlField Variables { get; set; }
+    [JsonProperty("Variables")] public TcaXmlField Variables { get; set; } = new();
 
     [JsonProperty("InstalledMods")] public IList<string> InstalledMods { get; set; }
 
@@ -239,15 +239,7 @@ public class Service : ObjectBase, IObjectBaseCrud<Service>, IPowerable
     [JsonProperty("Notes")] public string Notes { get; set; }
 
     [JsonIgnore] public FileManagerService FileManagerService => new(this);
-
-    // [JsonIgnore]
-    // public User.User User => Controller.TcaClient.UsersController.GetUser(UserId).ConfigureAwait(false).GetAwaiter()
-    //     .GetResult();
-    //
-    // [JsonIgnore]
-    // public Server.Server Server =>
-    //     Controller.TcaClient.ServersController.GetServer(ServerId).ConfigureAwait(false).GetAwaiter().GetResult();
-
+    
     public async Task<bool> Update(Action<Service> action)
     {
         var service = new Service();
@@ -320,5 +312,17 @@ public class Service : ObjectBase, IObjectBaseCrud<Service>, IPowerable
         var request = TcaClient.ServicesController.GenerateDefaultRequest( ServiceId.ToString(), nameof(Unsuspend));
         request.Method = HttpMethod.Post;
         return (await TcaClient.ServicesController.ExecuteBaseResponseRequest(request)).Success;
+    }
+    
+    public async Task<ServiceStatus> GetStatus()
+    {
+        var request = TcaClient.ServicesController.GenerateDefaultRequest( ServiceId.ToString(), "Status");
+        return (await TcaClient.ServicesController.ExecuteBaseResponseRequest<ServiceStatus>(request)).Result;
+    }
+    
+    public async Task<ServiceQuery> GetQuery()
+    {
+        var request = TcaClient.ServicesController.GenerateDefaultRequest( ServiceId.ToString(), "Query");
+        return (await TcaClient.ServicesController.ExecuteBaseResponseRequest<ServiceQuery>(request)).Result;
     }
 }

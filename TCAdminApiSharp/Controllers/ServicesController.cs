@@ -28,8 +28,7 @@ public class ServicesController : BaseController
 
     public async Task<ListResponse<Service>> FindServices(QueryableInfo query)
     {
-        var request = GenerateDefaultRequest("gameservices");
-        request.Method = HttpMethod.Post;;
+        var request = GenerateDefaultRequest(HttpMethod.Post, "gameservices");
         query.BuildQuery(request);
         var result = await ExecuteListResponseRequest<Service>(request);
         return result;

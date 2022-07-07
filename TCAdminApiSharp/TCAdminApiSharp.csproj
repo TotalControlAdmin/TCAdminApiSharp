@@ -7,13 +7,17 @@
         <Authors>Alex Redding</Authors>
         <Description>A C# Wrapper for the TCAdmin REST API. </Description>
         <PackageProjectUrl>https://github.com/TotalControlAdmin/TCAdminApiSharp</PackageProjectUrl>
-        <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
-        <PackageIconUrl>https://avatars3.githubusercontent.com/u/67070230?s=200&amp;v=4</PackageIconUrl>
+        <PackageIcon>TC_LOGO_SMALL.png</PackageIcon>
         <RepositoryUrl>https://github.com/TotalControlAdmin/TCAdminApiSharp</RepositoryUrl>
         <PackageTags>TCAdmin, Wrapper, Rest, Api</PackageTags>
         <AssemblyVersion>2.0.0</AssemblyVersion>
-        <FileVersion>2.0.0</FileVersion>
-        <PackageVersion>1.0.2</PackageVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Version)' == ''">
+        <VersionPrefix Condition="'$(VersionPrefix)' == ''">$(AssemblyVersion)</VersionPrefix>
+        <Version Condition="'$(VersionSuffix)' != ''">$(VersionPrefix)-$(VersionSuffix)-$(BuildNumber)</Version>
+        <Version Condition="'$(Version)' == ''">$(VersionPrefix)</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,6 +25,10 @@
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="Serilog" Version="2.11.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="TC_LOGO_SMALL.png" Pack="true" PackagePath="" />
     </ItemGroup>
 
 </Project>

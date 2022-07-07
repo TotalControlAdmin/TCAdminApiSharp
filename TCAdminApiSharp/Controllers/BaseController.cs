@@ -103,20 +103,20 @@ public class BaseController
             if (!string.IsNullOrEmpty(strResponse))
             {
                 var exceptionResponse = JsonConvert.DeserializeObject<BaseResponse<Exception>>(strResponse);
-                throw new ApiResponseException(httpResponseMessage, exceptionResponse);
+                if (exceptionResponse != null) throw new ApiResponseException(httpResponseMessage, exceptionResponse);
             }
             
-            throw new ApiResponseException(httpResponseMessage, "Response Status Code is: " + httpResponseMessage.StatusCode);
+            throw new ApiResponseException(httpResponseMessage, $"Response Status Code is: {httpResponseMessage.StatusCode} ({httpResponseMessage.ReasonPhrase})");
         }
 
         var response =
             JsonConvert.DeserializeObject<T>(strResponse, Constants.IgnoreDefaultValues);
-        if (response != null) ApplyObjectBaseTCAClient(response, true);
+        if (response != null) ApplyObjectBaseTcaClient(response, true);
 
         return new Tuple<T, HttpResponseMessage>(response, httpResponseMessage);;
     }
 
-    public void ApplyObjectBaseTCAClient(object obj, bool recursive)
+    public void ApplyObjectBaseTcaClient(object obj, bool recursive)
     {
         var type = obj.GetType();
         // if (type.IsSubclassOf(typeof(ITCAdminClientCompatible)))
@@ -132,7 +132,7 @@ public class BaseController
                 var value = type.GetProperty("Result")?.GetValue(obj);
                 if (value != null)
                 {
-                    ApplyObjectBaseTCAClient(value, recursive);
+                    ApplyObjectBaseTcaClient(value, recursive);
                 }
             }
 
@@ -141,7 +141,7 @@ public class BaseController
                 var enumerable = (IEnumerable<object>)obj;
                 foreach (var o in enumerable)
                 {
-                    ApplyObjectBaseTCAClient(o, recursive);
+                    ApplyObjectBaseTcaClient(o, recursive);
                 }
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Serilog;
 using Serilog.Events;
 using TCAdminApiSharp.Controllers;
@@ -17,6 +18,7 @@ public class TcaClient : IDisposable
     public readonly TasksController TasksController;
     public readonly TcaClientSettings Settings;
     internal readonly HttpClient HttpClient;
+    private int? _myUserId;
 
     public TcaClient(string host, string apiKey, TcaClientSettings? clientSettings = null)
     {
@@ -40,9 +42,15 @@ public class TcaClient : IDisposable
         TasksController = new TasksController(this);
     }
 
-    internal int GetTokenUserId()
+    internal async Task<int> GetTokenUserId()
     {
-        return int.Parse(_apiKey.Split('#')[0]);
+        if (_myUserId == null)
+        {
+            var me = await UsersController.GetMe();
+            _myUserId = me.UserId;
+        }
+
+        return _myUserId.Value;
     }
 
     private static void SetupDefaultLogger(LogEventLevel logEventLevel)
@@ -56,5 +64,6 @@ public class TcaClient : IDisposable
     public void Dispose()
     {
         HttpClient.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

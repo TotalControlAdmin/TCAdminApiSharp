@@ -88,7 +88,7 @@ public class User : ObjectBase, IObjectBaseCrud<User>
     
     public async Task<bool> SetPassword(string password)
     {
-        var request = TcaClient.UsersController.GenerateDefaultRequest(nameof(SetPassword), UserId.ToString());
+        var request = TcaClient.UsersController.GenerateDefaultRequest(UserId.ToString(), nameof(SetPassword));
         request.Method = HttpMethod.Post;
         request.Content = new FormUrlEncodedContent(new[]
             { new KeyValuePair<string, string>(nameof(password), password) });
@@ -113,24 +113,22 @@ public class User : ObjectBase, IObjectBaseCrud<User>
 
     public async Task<bool> Suspend(bool recursive = true, bool suspendServices = true)
     {
-        var request = TcaClient.UsersController.GenerateDefaultRequest(nameof(Suspend), UserId.ToString());
-        request.Method = HttpMethod.Post;
-        request.Content = new FormUrlEncodedContent(new[]
+        var request = TcaClient.UsersController.GenerateDefaultRequest(HttpMethod.Post, UserId.ToString(), nameof(Suspend));
+        request.Content = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
         {
-            new KeyValuePair<string, string>(nameof(recursive), recursive.ToString()),
-            new KeyValuePair<string, string>(nameof(suspendServices), suspendServices.ToString())
+            new(nameof(recursive), recursive.ToString()),
+            new(nameof(suspendServices), suspendServices.ToString())
         });
         return (await TcaClient.UsersController.ExecuteBaseResponseRequest(request)).Success;
     }
 
     public async Task<bool> Unsuspend(bool recursive = true, bool enableServices = true)
     {
-        var request = TcaClient.UsersController.GenerateDefaultRequest(nameof(Unsuspend), UserId.ToString());
-        request.Method = HttpMethod.Post;
-        request.Content = new FormUrlEncodedContent(new[]
+        var request = TcaClient.UsersController.GenerateDefaultRequest(HttpMethod.Post, UserId.ToString(), nameof(Unsuspend));
+        request.Content = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
         {
-            new KeyValuePair<string, string>(nameof(recursive), recursive.ToString()),
-            new KeyValuePair<string, string>(nameof(enableServices), enableServices.ToString())
+            new(nameof(recursive), recursive.ToString()),
+            new(nameof(enableServices), enableServices.ToString())
         });
         return (await TcaClient.UsersController.ExecuteBaseResponseRequest(request)).Success;
     }

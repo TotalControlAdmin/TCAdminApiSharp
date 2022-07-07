@@ -28,10 +28,9 @@ public class UsersController : BaseController
 
     public async Task<ListResponse<User>> FindUsers(QueryableInfo query)
     {
-        var request = GenerateDefaultRequest("users", TcaClient.GetTokenUserId().ToString());
-        // Logger.Debug(query.BuildQuery(request));
+        var tokenUserId = await TcaClient.GetTokenUserId();
+        var request = GenerateDefaultRequest(HttpMethod.Post, "myusers", tokenUserId.ToString());
         request.Method = HttpMethod.Post;
-        // request.AddParameter("queryInfo", query.BuildQuery(request), ParameterType.GetOrPost);
         query.BuildQuery(request);
         return await ExecuteListResponseRequest<User>(request);
     }

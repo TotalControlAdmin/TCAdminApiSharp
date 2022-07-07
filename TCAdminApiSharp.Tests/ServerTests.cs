@@ -27,7 +27,7 @@ public class ServerTests
         var server = await _tcaClient.ServersController.GetServer(1);
         Assert.AreEqual("Master", server.Name);
     }
-    
+
     // [Test]
     // public async Task GetServersTest()
     // {

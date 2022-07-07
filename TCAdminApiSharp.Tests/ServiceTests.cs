@@ -35,7 +35,7 @@ public class ServiceTests
         var service = await _tcaClient.ServicesController.GetService(1);
         await service.Start();
         service = await _tcaClient.ServicesController.GetService(1);
-        Assert.AreEqual(ServiceStatus.Running, service.ServiceStatus);
+        Assert.AreEqual(EServiceStatus.Running, service.EServiceStatus);
     }
 
     [Test]
@@ -97,6 +97,7 @@ public class ServiceTests
         await service.Update(x =>
         {
             x.Slots = 5;
+            x.Variables.Add("test", 123);
             // x.Executable = "changed.exe";
         });
     }
