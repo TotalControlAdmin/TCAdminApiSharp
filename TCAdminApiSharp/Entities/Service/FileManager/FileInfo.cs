@@ -58,4 +58,5 @@ public class FileInfo
     public System.Threading.Tasks.Task<bool> Copy(string target, bool overwrite = true) => FileManagerService.Copy(new []{this.FullName}, target, overwrite);
     public System.Threading.Tasks.Task<CompressModel> Compress(string target) => FileManagerService.Compress(new []{this.FullName}, target);
     public System.Threading.Tasks.Task<bool> Extract(string target) => FileManagerService.Extract(this.FullName, target);
+    public System.Threading.Tasks.Task<bool> Delete() => FileManagerService.Delete(this.FullName);
 }

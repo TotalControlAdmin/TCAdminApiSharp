@@ -44,4 +44,5 @@ public class DirectoryListing
     public System.Threading.Tasks.Task<bool> Move(string target, bool overwrite = true) => FileManagerService.Move(new []{this.Path}, target, overwrite);
     public System.Threading.Tasks.Task<bool> Copy(string target, bool overwrite = true) => FileManagerService.Copy(new []{this.Path}, target, overwrite);
     public System.Threading.Tasks.Task<CompressModel> Compress(string target) => FileManagerService.Compress(new []{this.Path}, target);
+    public System.Threading.Tasks.Task<bool> Delete() => FileManagerService.Delete(this.Path);
 }

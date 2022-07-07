@@ -133,4 +133,13 @@ public class FileManagerService : ITCAdminClientCompatible
         var executeBaseResponseRequest = await TcaClient.ServicesController.ExecuteBaseResponseRequest(request);
         return executeBaseResponseRequest.Success;
     }
+    
+    public async System.Threading.Tasks.Task<bool> Delete(string path)
+    {
+        if (path == null) throw new ArgumentNullException(nameof(path));
+        var endpoint = QueryHelpers.AddQueryString(FileManagerEndpoint, nameof(path), path);
+        var request = TcaClient.ServicesController.GenerateDefaultRequest(HttpMethod.Post, endpoint);
+        var executeBaseResponseRequest = await TcaClient.ServicesController.ExecuteBaseResponseRequest(request);
+        return executeBaseResponseRequest.Success;
+    }
 }
